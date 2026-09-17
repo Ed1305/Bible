@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { verses } from "@/db/schema";
 import { and, eq, ilike } from "drizzle-orm";
+import { searchPacks } from "@/lib/bible/packs.server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
     return Response.json({ results: [], query: q });
   }
 
+  // 1. Database (indexed, fastest when available).
   try {
     const rows = await db
       .select()
@@ -36,6 +38,10 @@ export async function GET(request: Request) {
       })),
     });
   } catch {
-    return Response.json({ error: "Server error" }, { status: 500 });
+    // database unavailable — fall through to the bundled packs
   }
+
+  // 2. Bundled offline packs (full scan, accent-insensitive).
+  const results = searchPacks(translation, q, 60);
+  return Response.json({ query: q, translation, results });
 }

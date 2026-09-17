@@ -53,6 +53,11 @@ export type UiStrings = {
   chapter: string;
   downloadOffline: string;
   downloaded: string;
+  offlinePacks: string;
+  offlinePacksHint: string;
+  downloading: string;
+  remove: string;
+  booksWord: string;
   continueReading: string;
   verseOfDay: string;
 };
@@ -110,6 +115,11 @@ const en: UiStrings = {
   chapter: "Chapter",
   downloadOffline: "Download for offline",
   downloaded: "Downloaded",
+  offlinePacks: "Offline Bibles",
+  offlinePacksHint: "Download a full translation so you can read with zero signal — in the air, underground or offline.",
+  downloading: "Downloading…",
+  remove: "Remove",
+  booksWord: "books",
   continueReading: "Continue reading",
   verseOfDay: "Verse of the day",
 };
@@ -168,6 +178,11 @@ const fr: UiStrings = {
   chapter: "Chapitre",
   downloadOffline: "Télécharger hors ligne",
   downloaded: "Téléchargé",
+  offlinePacks: "Bibles hors ligne",
+  offlinePacksHint: "Téléchargez une traduction complète pour lire sans aucune connexion.",
+  downloading: "Téléchargement…",
+  remove: "Supprimer",
+  booksWord: "livres",
   continueReading: "Continuer la lecture",
   verseOfDay: "Verset du jour",
 };

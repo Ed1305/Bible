@@ -1,5 +1,5 @@
 {
-  "name": "Lumina Bible — Read & Listen Offline",
+  "name": "Lumina Bible \u2014 Read & Listen Offline",
   "short_name": "Lumina Bible",
   "description": "Read, listen to, and study the Holy Bible offline in English, French, Swahili, Lingala and Tshiluba.",
   "start_url": "/",
@@ -8,7 +8,11 @@
   "orientation": "portrait",
   "background_color": "#f4f7fb",
   "theme_color": "#f4f7fb",
-  "categories": ["books", "education", "lifestyle"],
+  "categories": [
+    "books",
+    "education",
+    "lifestyle"
+  ],
   "lang": "en",
   "icons": [
     {
@@ -28,6 +32,17 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
+  ],
+  "id": "/",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
   ]
 }
