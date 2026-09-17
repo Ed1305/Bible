@@ -10,9 +10,11 @@ import {
   type ReactNode,
 } from "react";
 import { DEFAULT_TRANSLATION, getTranslation } from "./bible/translations";
-import type { LangCode } from "./bible/books";
+import { BOOKS_BY_SLUG, type LangCode, type Testament } from "./bible/books";
 import { ui, type UiStrings } from "./bible/i18n";
 import { getOfflineChapter } from "./offline";
+
+export type ThemeMode = "light" | "dark";
 
 export interface VerseData {
   verse: number;
@@ -44,6 +46,8 @@ export interface JournalEntry {
 interface Settings {
   translation: string;
   textScale: number;
+  theme: ThemeMode;
+  lastTestament: Testament;
 }
 
 interface UserData {
@@ -75,6 +79,8 @@ interface StoreValue {
   t: UiStrings;
   setTranslation: (code: string) => void;
   setTextScale: (v: number) => void;
+  setTheme: (theme: ThemeMode) => void;
+  setLastTestament: (testament: Testament) => void;
   verseKey: (book: string, chapter: number, verse: number, translation?: string) => string;
   toggleBookmark: (book: string, chapter: number, verse: number) => void;
   toggleHighlight: (book: string, chapter: number, verse: number) => void;
@@ -106,16 +112,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>({
     translation: DEFAULT_TRANSLATION,
     textScale: 1,
+    theme: "light",
+    lastTestament: "OT",
   });
   const [user, setUser] = useState<UserData>(DEFAULT_USER);
 
   // hydrate
   useEffect(() => {
     try {
-      const s = localStorage.getItem(SETTINGS_KEY);
-      if (s) setSettings((p) => ({ ...p, ...JSON.parse(s) }));
-      const u = localStorage.getItem(USER_KEY);
-      if (u) setUser((p) => ({ ...p, ...JSON.parse(u) }));
+      const rawS = localStorage.getItem(SETTINGS_KEY);
+      const rawU = localStorage.getItem(USER_KEY);
+      const parsedS = rawS ? JSON.parse(rawS) : {};
+      const parsedU = rawU ? JSON.parse(rawU) : {};
+      if (rawU) setUser((p) => ({ ...p, ...parsedU }));
+      const theme: ThemeMode = parsedS.theme === "dark" ? "dark" : "light";
+      let lastTestament: Testament =
+        parsedS.lastTestament === "NT" ? "NT" : "OT";
+      if (parsedS.lastTestament !== "OT" && parsedS.lastTestament !== "NT") {
+        lastTestament = BOOKS_BY_SLUG[parsedU.lastRead?.book]?.testament ?? "OT";
+      }
+      setSettings((p) => ({
+        ...p,
+        ...parsedS,
+        theme,
+        lastTestament,
+        textScale: typeof parsedS.textScale === "number" ? parsedS.textScale : p.textScale,
+      }));
     } catch {
       /* ignore */
     }
@@ -169,6 +191,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setTextScale = useCallback((v: number) => {
     setSettings((p) => ({ ...p, textScale: Math.min(1.6, Math.max(0.85, v)) }));
+  }, []);
+
+  const setTheme = useCallback((theme: ThemeMode) => {
+    setSettings((p) => ({ ...p, theme }));
+  }, []);
+
+  const setLastTestament = useCallback((testament: Testament) => {
+    setSettings((p) => ({ ...p, lastTestament: testament }));
   }, []);
 
   const toggleBookmark = useCallback(
@@ -228,10 +258,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setLastRead = useCallback(
     (book: string, chapter: number) => {
+      const testament = BOOKS_BY_SLUG[book]?.testament ?? "OT";
       setUser((p) => ({
         ...p,
         lastRead: { translation: settings.translation, book, chapter },
       }));
+      setSettings((p) => ({ ...p, lastTestament: testament }));
     },
     [settings.translation],
   );
@@ -358,6 +390,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       t,
       setTranslation,
       setTextScale,
+      setTheme,
+      setLastTestament,
       verseKey,
       toggleBookmark,
       toggleHighlight,
@@ -377,7 +411,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       getCachedChapter,
     }),
     [
-      ready, online, settings, user, lang, t, setTranslation, setTextScale, verseKey,
+      ready, online, settings, user, lang, t, setTranslation, setTextScale, setTheme,
+      setLastTestament, verseKey,
       toggleBookmark, toggleHighlight, setNote, isBookmarked, isHighlighted, getNote,
       setLastRead, togglePlanDay, completedDays, addPrayer, togglePrayer, deletePrayer,
       addJournal, deleteJournal, fetchChapter, getCachedChapter,

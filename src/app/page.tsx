@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
-import { BOOKS, bookName, type Testament } from "@/lib/bible/books";
+import { BOOKS, bookName, type BookMeta } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
-import { Avatar, Segmented } from "@/components/ui";
+import { Avatar, Segmented, Sheet } from "@/components/ui";
 import {
   SearchIcon,
   BellIcon,
@@ -20,10 +20,11 @@ import {
 type AvailMap = Record<string, Record<string, number[]>>;
 
 export default function BibleHome() {
-  const { settings, user, lang, t } = useStore();
-  const [testament, setTestament] = useState<Testament>("OT");
+  const { settings, user, lang, t, setLastTestament } = useStore();
+  const [picking, setPicking] = useState<BookMeta | null>(null);
   const [avail, setAvail] = useState<AvailMap>({});
   const tr = getTranslation(settings.translation);
+  const testament = settings.lastTestament;
 
   useEffect(() => {
     fetch("/api/available")
@@ -125,9 +126,9 @@ export default function BibleHome() {
 
       {/* Testament toggle */}
       <div className="mt-4">
-        <Segmented<Testament>
+        <Segmented
           value={testament}
-          onChange={setTestament}
+          onChange={setLastTestament}
           options={[
             { value: "OT", label: t.oldTestament },
             { value: "NT", label: t.newTestament },
@@ -142,9 +143,10 @@ export default function BibleHome() {
           const has = (availForTr[b.slug]?.length ?? 0) > 0;
           return (
             <li key={b.slug}>
-              <Link
-                href={`/read/${settings.translation}/${b.slug}/1`}
-                className="flex items-center justify-between rounded-[16px] border border-line bg-surface px-4 py-3.5 shadow-soft transition active:scale-[0.99]"
+              <button
+                type="button"
+                onClick={() => setPicking(b)}
+                className="flex w-full items-center justify-between rounded-[16px] border border-line bg-surface px-4 py-3.5 text-left shadow-soft transition active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3">
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-surface-2 text-[13px] font-semibold text-muted">
@@ -184,11 +186,34 @@ export default function BibleHome() {
                   )}
                   <ChevronRight className="h-4 w-4" />
                 </div>
-              </Link>
+              </button>
             </li>
           );
         })}
       </ul>
+
+      {picking && (
+        <Sheet onClose={() => setPicking(null)}>
+          <p className="mb-1 text-center font-serif text-lg font-semibold">
+            {bookName(picking.slug, lang)}
+          </p>
+          <p className="mb-4 text-center text-[12px] font-medium uppercase tracking-wider text-muted">
+            {t.selectChapter}
+          </p>
+          <div className="grid grid-cols-6 gap-2">
+            {Array.from({ length: picking.chapters }, (_, i) => i + 1).map((c) => (
+              <Link
+                key={c}
+                href={`/read/${settings.translation}/${picking.slug}/${c}`}
+                onClick={() => setPicking(null)}
+                className="grid h-11 place-items-center rounded-xl bg-surface-2 text-sm font-medium text-ink hover:bg-line"
+              >
+                {c}
+              </Link>
+            ))}
+          </div>
+        </Sheet>
+      )}
     </div>
   );
 }

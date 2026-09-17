@@ -60,6 +60,10 @@ export type UiStrings = {
   booksWord: string;
   continueReading: string;
   verseOfDay: string;
+  selectChapter: string;
+  theme: string;
+  light: string;
+  dark: string;
 };
 
 const en: UiStrings = {
@@ -122,6 +126,10 @@ const en: UiStrings = {
   booksWord: "books",
   continueReading: "Continue reading",
   verseOfDay: "Verse of the day",
+  selectChapter: "Select a chapter",
+  theme: "Theme",
+  light: "Light",
+  dark: "Dark",
 };
 
 const fr: UiStrings = {
@@ -185,6 +193,10 @@ const fr: UiStrings = {
   booksWord: "livres",
   continueReading: "Continuer la lecture",
   verseOfDay: "Verset du jour",
+  selectChapter: "Choisissez un chapitre",
+  theme: "Thème",
+  light: "Clair",
+  dark: "Sombre",
 };
 
 const sw: UiStrings = {
@@ -238,6 +250,10 @@ const sw: UiStrings = {
   chapter: "Sura",
   continueReading: "Endelea kusoma",
   verseOfDay: "Aya ya siku",
+  selectChapter: "Chagua sura",
+  theme: "Mandhari",
+  light: "Mwanga",
+  dark: "Giza",
 };
 
 const ln: UiStrings = {
@@ -291,6 +307,10 @@ const ln: UiStrings = {
   chapter: "Mokapo",
   continueReading: "Landa kotanga",
   verseOfDay: "Vɛrsɛ ya mokolo",
+  selectChapter: "Pona mokapo",
+  theme: "Lomengo",
+  light: "Pole",
+  dark: "Molili",
 };
 
 const lua: UiStrings = {
@@ -344,6 +364,10 @@ const lua: UiStrings = {
   chapter: "Nshapita",
   continueReading: "Tungunuka kubala",
   verseOfDay: "Mvese wa dituku",
+  selectChapter: "Sungula nshapita",
+  theme: "Mufundilu",
+  light: "Mueshu",
+  dark: "Mfuku",
 };
 
 export const UI: Record<LangCode, UiStrings> = { en, fr, sw, ln, lua };

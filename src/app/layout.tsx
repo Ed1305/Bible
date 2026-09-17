@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import "@fontsource-variable/inter";
-import "@fontsource-variable/lora";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import BottomNav from "@/components/BottomNav";
 import OfflineBanner from "@/components/OfflineBanner";
 import StatusBar from "@/components/StatusBar";
+
+const THEME_SCRIPT = `(function(){try{var s=JSON.parse(localStorage.getItem("bible.settings")||"{}");if(s.theme==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}})();`;
 
 
 const APP_NAME = "Lumina Bible";
@@ -56,7 +56,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="bg-bg text-ink antialiased">
         <Providers>
           <OfflineBanner />

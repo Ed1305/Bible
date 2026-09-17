@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { StoreProvider } from "@/lib/store";
+import { StoreProvider, useStore } from "@/lib/store";
+
+function ThemeSync() {
+  const { settings } = useStore();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", settings.theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", settings.theme === "dark" ? "#11151c" : "#f4f7fb");
+    }
+  }, [settings.theme]);
+
+  return null;
+}
 
 export default function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -17,5 +32,10 @@ export default function Providers({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  return <StoreProvider>{children}</StoreProvider>;
+  return (
+    <StoreProvider>
+      <ThemeSync />
+      {children}
+    </StoreProvider>
+  );
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { useStore, type VerseData } from "@/lib/store";
 import { BOOKS, BOOKS_BY_SLUG, bookName } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
@@ -19,10 +18,10 @@ import {
 
 function ListenInner() {
   const params = useSearchParams();
-  const { settings, fetchChapter, lang, t } = useStore();
+  const { settings, fetchChapter, lang, t, user } = useStore();
 
-  const [book, setBook] = useState(params.get("book") || "psalms");
-  const [chapter, setChapter] = useState(Number(params.get("chapter")) || 23);
+  const [book, setBook] = useState(params.get("book") || "genesis");
+  const [chapter, setChapter] = useState(Number(params.get("chapter")) || 1);
   const translation = params.get("translation") || settings.translation;
   const tr = getTranslation(translation);
 
@@ -32,32 +31,80 @@ function ListenInner() {
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(0.95);
   const [supported, setSupported] = useState(true);
+  const [audioError, setAudioError] = useState("");
+
   const versesRef = useRef<VerseData[]>([]);
   const rateRef = useRef(rate);
-  const activeRef = useRef(false);
+  const tokenRef = useRef(0);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const keepAliveRef = useRef<number | null>(null);
+  const primedRef = useRef(false);
 
   useEffect(() => {
     setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
   }, []);
 
   useEffect(() => {
+    if (!supported) return;
+    const loadVoices = () => window.speechSynthesis.getVoices();
+    loadVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+  }, [supported]);
+
+  useEffect(() => {
+    if (primedRef.current) return;
+    const qBook = params.get("book");
+    const qChapter = params.get("chapter");
+    if (qBook) {
+      setBook(qBook);
+      if (qChapter) setChapter(Number(qChapter) || 1);
+      primedRef.current = true;
+      return;
+    }
+    if (user.lastRead) {
+      setBook(user.lastRead.book);
+      setChapter(user.lastRead.chapter);
+      primedRef.current = true;
+    }
+  }, [params, user.lastRead]);
+
+  useEffect(() => {
     rateRef.current = rate;
   }, [rate]);
 
+  const clearKeepAlive = useCallback(() => {
+    if (keepAliveRef.current != null) {
+      window.clearInterval(keepAliveRef.current);
+      keepAliveRef.current = null;
+    }
+  }, []);
+
+  const startKeepAlive = useCallback(() => {
+    clearKeepAlive();
+    keepAliveRef.current = window.setInterval(() => {
+      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    }, 8000);
+  }, [clearKeepAlive]);
+
   const stop = useCallback(() => {
-    activeRef.current = false;
+    tokenRef.current += 1;
+    clearKeepAlive();
+    utteranceRef.current = null;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
     setPlaying(false);
     setCurrent(-1);
-  }, []);
+  }, [clearKeepAlive]);
 
-  // load chapter
   useEffect(() => {
     let on = true;
     stop();
     setLoading(true);
+    setAudioError("");
     fetchChapter(translation, book, chapter).then((d) => {
       if (!on) return;
       setVerses(d.verses);
@@ -79,57 +126,101 @@ function ListenInner() {
       voices.find((v) => v.lang.toLowerCase() === want) ||
       voices.find((v) => v.lang.toLowerCase().startsWith(base)) ||
       voices.find((v) => v.lang.toLowerCase().startsWith("en")) ||
+      voices[0] ||
       null
     );
   }, [tr.ttsLang]);
 
   const speakFrom = useCallback(
-    (index: number) => {
+    (index: number, token: number) => {
       const list = versesRef.current;
+      if (token !== tokenRef.current) return;
       if (index < 0 || index >= list.length) {
         setPlaying(false);
         setCurrent(-1);
-        activeRef.current = false;
+        clearKeepAlive();
         return;
       }
-      const u = new SpeechSynthesisUtterance(list[index].text);
+      const text = (list[index].text || "").trim();
+      if (!text) {
+        speakFrom(index + 1, token);
+        return;
+      }
+      const u = new SpeechSynthesisUtterance(text);
+      utteranceRef.current = u;
       u.lang = tr.ttsLang;
       u.rate = rateRef.current;
-      const v = pickVoice();
-      if (v) u.voice = v;
-      u.onstart = () => setCurrent(index);
-      u.onend = () => {
-        if (!activeRef.current) return;
-        speakFrom(index + 1);
+      const voice = pickVoice();
+      if (voice) u.voice = voice;
+      u.onstart = () => {
+        if (token !== tokenRef.current) return;
+        setCurrent(index);
+        setPlaying(true);
+        setAudioError("");
       };
-      window.speechSynthesis.speak(u);
+      u.onerror = (e) => {
+        if (token !== tokenRef.current) return;
+        if (e.error === "interrupted" || e.error === "canceled") return;
+        setAudioError("Could not play audio on this device.");
+        setPlaying(false);
+      };
+      u.onend = () => {
+        if (token !== tokenRef.current) return;
+        speakFrom(index + 1, token);
+      };
+      try {
+        window.speechSynthesis.speak(u);
+      } catch {
+        setAudioError("Could not play audio on this device.");
+        setPlaying(false);
+      }
     },
-    [pickVoice, tr.ttsLang],
+    [clearKeepAlive, pickVoice, tr.ttsLang],
   );
 
   const play = useCallback(
     (from?: number) => {
-      if (!supported || !versesRef.current.length) return;
+      if (!supported) {
+        setAudioError("Audio playback isn't supported on this device's browser.");
+        return;
+      }
+      if (!versesRef.current.length) return;
+      const token = tokenRef.current + 1;
+      tokenRef.current = token;
       window.speechSynthesis.cancel();
-      activeRef.current = true;
+      const start = from ?? (current >= 0 ? current : 0);
       setPlaying(true);
-      speakFrom(from ?? (current >= 0 ? current : 0));
+      startKeepAlive();
+      window.setTimeout(() => {
+        if (token !== tokenRef.current) return;
+        speakFrom(start, token);
+      }, 120);
     },
-    [supported, speakFrom, current],
+    [supported, speakFrom, current, startKeepAlive],
   );
 
   const pause = useCallback(() => {
-    if (playing) {
+    if (!supported) return;
+    if (playing && window.speechSynthesis.speaking) {
       window.speechSynthesis.pause();
       setPlaying(false);
-    } else {
+      if (!window.speechSynthesis.paused) {
+        // Some browsers ignore pause — keep the current verse ready to replay.
+        tokenRef.current += 1;
+        window.speechSynthesis.cancel();
+      }
+      return;
+    }
+    if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
       setPlaying(true);
+      return;
     }
-  }, [playing]);
+    play(current >= 0 ? current : 0);
+  }, [supported, playing, play, current]);
 
   const next = useCallback(() => {
-    const n = Math.min(current + 1, versesRef.current.length - 1);
+    const n = Math.min(Math.max(current, 0) + 1, versesRef.current.length - 1);
     play(n);
   }, [current, play]);
   const prev = useCallback(() => {
@@ -154,7 +245,6 @@ function ListenInner() {
         </div>
       </header>
 
-      {/* Selectors */}
       <div className="mt-4 flex gap-2">
         <select
           value={book}
@@ -162,7 +252,7 @@ function ListenInner() {
             setBook(e.target.value);
             setChapter(1);
           }}
-          className="flex-1 rounded-full border border-line bg-surface px-4 py-2.5 text-sm font-medium shadow-soft outline-none"
+          className="flex-1 rounded-full border border-line bg-surface px-4 py-2.5 text-sm font-medium text-ink shadow-soft outline-none"
         >
           {BOOKS.map((b) => (
             <option key={b.slug} value={b.slug}>
@@ -173,7 +263,7 @@ function ListenInner() {
         <select
           value={chapter}
           onChange={(e) => setChapter(Number(e.target.value))}
-          className="w-28 rounded-full border border-line bg-surface px-4 py-2.5 text-sm font-medium shadow-soft outline-none"
+          className="w-28 rounded-full border border-line bg-surface px-4 py-2.5 text-sm font-medium text-ink shadow-soft outline-none"
         >
           {Array.from({ length: chapterCount }, (_, i) => i + 1).map((c) => (
             <option key={c} value={c}>
@@ -183,7 +273,6 @@ function ListenInner() {
         </select>
       </div>
 
-      {/* Now playing card */}
       <div className="mt-4 rounded-[22px] border border-line bg-surface p-5 shadow-soft">
         <div className="flex items-center gap-4">
           <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-accent to-[#41618f] text-white">
@@ -202,13 +291,12 @@ function ListenInner() {
           </div>
         </div>
 
-        {!supported && (
+        {(!supported || audioError) && (
           <p className="mt-4 rounded-xl bg-surface-2 p-3 text-center text-[13px] text-muted">
-            Audio playback isn&apos;t supported on this device&apos;s browser.
+            {audioError || "Audio playback isn't supported on this device's browser."}
           </p>
         )}
 
-        {/* Controls */}
         <div className="mt-5 flex items-center justify-center gap-3">
           <button
             onClick={prev}
@@ -228,7 +316,7 @@ function ListenInner() {
             </button>
           ) : (
             <button
-              onClick={() => (current >= 0 ? play(current) : play(0))}
+              onClick={() => play(current >= 0 ? current : 0)}
               disabled={!verses.length || !supported}
               className="grid h-16 w-16 place-items-center rounded-full bg-accent text-white shadow-float disabled:opacity-40"
               aria-label={t.play}
@@ -253,7 +341,6 @@ function ListenInner() {
           </button>
         </div>
 
-        {/* Speed */}
         <div className="mt-5 flex items-center gap-3">
           <span className="text-[12px] font-medium text-muted">Speed</span>
           <input
@@ -271,7 +358,6 @@ function ListenInner() {
         </div>
       </div>
 
-      {/* Verse list, follows along */}
       <div className="mt-4 rounded-[22px] border border-line bg-surface p-5 shadow-soft">
         {loading ? (
           <div className="space-y-3">

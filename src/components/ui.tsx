@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BackIcon } from "./icons";
+import { BackIcon, CloseIcon } from "./icons";
 
 export function Chip({
   active,
@@ -119,6 +119,34 @@ export function Card({
       }
     >
       {children}
+    </div>
+  );
+}
+
+export function Sheet({
+  children,
+  onClose,
+}: {
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40" />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="animate-pop safe-bottom relative w-full max-w-xl rounded-t-[24px] border border-line bg-surface p-5 shadow-float"
+      >
+        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-line" />
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-muted"
+          aria-label="Close"
+        >
+          <CloseIcon className="h-4 w-4" />
+        </button>
+        <div className="max-h-[70vh] overflow-y-auto">{children}</div>
+      </div>
     </div>
   );
 }

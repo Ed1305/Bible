@@ -25,7 +25,7 @@ function formatMb(bytes: number): string {
 }
 
 export default function SettingsPage() {
-  const { settings, setTranslation, setTextScale, t } = useStore();
+  const { settings, setTranslation, setTextScale, setTheme, t } = useStore();
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -271,6 +271,33 @@ export default function SettingsPage() {
             );
           })}
         </ul>
+
+        {/* Theme */}
+        <div className="mt-6 rounded-[18px] border border-line bg-surface p-4 shadow-soft">
+          <p className="mb-3 text-[13px] font-semibold uppercase tracking-wider text-muted">
+            {t.theme}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {(["light", "dark"] as const).map((mode) => {
+              const active = settings.theme === mode;
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setTheme(mode)}
+                  className={
+                    "rounded-2xl border px-4 py-3 text-sm font-semibold transition " +
+                    (active
+                      ? "border-accent bg-accent-soft text-accent"
+                      : "border-line bg-surface-2 text-muted")
+                  }
+                >
+                  {mode === "light" ? t.light : t.dark}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Text size */}
         <div className="mt-6 rounded-[18px] border border-line bg-surface p-4 shadow-soft">
