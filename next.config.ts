@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Vercel serverless functions do NOT have `public/` on disk by default.
+  // Trace the bundled offline packs into the API lambdas so the DB-less
+  // fallbacks keep working in production.
+  outputFileTracingIncludes: {
+    "/api/*": ["./public/bible/**/*.json"],
+  },
   async headers() {
     return [
       {
