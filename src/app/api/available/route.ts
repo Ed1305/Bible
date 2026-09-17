@@ -1,10 +1,11 @@
 import { db } from "@/db";
 import { verses } from "@/db/schema";
-import { sql } from "drizzle-orm";
+import { getPackAvailability } from "@/lib/bible/packs.server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // 1. Database — everything actually seeded.
   try {
     const rows = await db
       .select({
@@ -26,6 +27,9 @@ export async function GET() {
 
     return Response.json({ available: map });
   } catch {
-    return Response.json({ error: "Server error" }, { status: 500 });
+    // database unavailable — fall through to the bundled packs
   }
+
+  // 2. Bundled offline packs.
+  return Response.json({ available: getPackAvailability() });
 }

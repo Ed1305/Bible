@@ -1,5 +1,5 @@
 // Lumina Bible service worker — offline-first caching.
-const VERSION = "lumina-v1";
+const VERSION = "lumina-v2";
 const SHELL_CACHE = `${VERSION}-shell`;
 const API_CACHE = `${VERSION}-api`;
 const ASSET_CACHE = `${VERSION}-assets`;

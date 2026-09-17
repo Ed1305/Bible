@@ -29,8 +29,10 @@
   --color-verdant-soft: var(--green-soft);
   --color-gold: var(--gold);
   --color-highlight: var(--highlight);
-  --font-sans: var(--font-ui, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
-  --font-serif: var(--font-scripture, "Iowan Old Style", "Palatino Linotype", "Georgia", serif);
+  --font-sans: "Inter Variable", var(--font-ui, ui-sans-serif), system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Lora Variable", var(--font-scripture, "Iowan Old Style"), "Palatino Linotype",
+    "Georgia", serif;
 }
 
 html {

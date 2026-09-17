@@ -12,6 +12,7 @@ import {
 import { DEFAULT_TRANSLATION, getTranslation } from "./bible/translations";
 import type { LangCode } from "./bible/books";
 import { ui, type UiStrings } from "./bible/i18n";
+import { getOfflineChapter } from "./offline";
 
 export interface VerseData {
   verse: number;
@@ -307,25 +308,42 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const fetchChapter = useCallback(
     async (translation: string, book: string, chapter: number): Promise<ChapterData> => {
       const cached = getCachedChapter(translation, book, chapter);
+
+      // 1. Offline-first: full translations downloaded into IndexedDB need no network.
+      try {
+        const offlineVerses = await getOfflineChapter(translation, book, chapter);
+        if (offlineVerses && offlineVerses.length > 0) {
+          return { translation, book, chapter, verses: offlineVerses };
+        }
+      } catch {
+        /* IndexedDB unavailable — continue with other sources */
+      }
+
+      // 2. Network (DB / bundled packs / upstream), mirrored into localStorage.
       try {
         const res = await fetch(
           `/api/chapter?translation=${translation}&book=${book}&chapter=${chapter}`,
         );
         if (!res.ok) throw new Error("bad");
         const data = (await res.json()) as ChapterData;
-        try {
-          localStorage.setItem(
-            chapterCacheKey(translation, book, chapter),
-            JSON.stringify(data),
-          );
-        } catch {
-          /* ignore quota */
+        if (data.verses.length > 0) {
+          try {
+            localStorage.setItem(
+              chapterCacheKey(data.translation, book, chapter),
+              JSON.stringify(data),
+            );
+          } catch {
+            /* ignore quota */
+          }
+          return data;
         }
-        return data;
       } catch {
-        if (cached) return cached;
-        return { translation, book, chapter, verses: [] };
+        /* offline or server error — fall through to caches */
       }
+
+      // 3. Anything seen before, in any translation.
+      if (cached) return cached;
+      return { translation, book, chapter, verses: [] };
     },
     [getCachedChapter],
   );

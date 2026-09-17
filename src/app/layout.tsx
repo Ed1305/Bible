@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Inter, Lora } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/lora";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import BottomNav from "@/components/BottomNav";
 import OfflineBanner from "@/components/OfflineBanner";
 import StatusBar from "@/components/StatusBar";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-ui", display: "swap" });
-const lora = Lora({ subsets: ["latin"], variable: "--font-scripture", display: "swap" });
 
 const APP_NAME = "Lumina Bible";
 const DESCRIPTION =
@@ -39,7 +38,10 @@ export const metadata: Metadata = {
     siteName: APP_NAME,
   },
   icons: {
-    icon: "/icons/icon-192.png",
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
     apple: "/icons/icon-192.png",
   },
 };
@@ -54,7 +56,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
+    <html lang="en">
       <body className="bg-bg text-ink antialiased">
         <Providers>
           <OfflineBanner />
