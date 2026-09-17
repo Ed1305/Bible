@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --border: #e7ecf3;
+  --text: #22272e;
+  --text-muted: #7c8794;
+  --accent: #5b7fb4;
+  --accent-soft: #eaf1fb;
+  --green: #6fae8f;
+  --green-soft: #e8f4ee;
+  --gold: #d9b26a;
+  --highlight: #f6ead0;
+  --danger: #d98a7a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-verdant: var(--green);
+  --color-verdant-soft: var(--green-soft);
+  --color-gold: var(--gold);
+  --color-highlight: var(--highlight);
+  --font-sans: var(--font-ui, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  --font-serif: var(--font-scripture, "Iowan Old Style", "Palatino Linotype", "Georgia", serif);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overscroll-behavior-y: none;
+}
+
+/* Soft card shadow */
+.shadow-soft {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+.shadow-float {
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12), 0 2px 6px rgba(16, 24, 40, 0.08);
+}
+
+/* Hide scrollbars for chip rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Scripture reading typography */
+.scripture {
+  font-family: var(--font-serif);
+  line-height: 1.75;
+  color: var(--text);
+}
+
+.verse-num {
+  font-family: var(--font-sans);
+  font-size: 0.7em;
+  font-weight: 600;
+  color: var(--accent);
+  vertical-align: super;
+  margin-right: 0.15em;
+  line-height: 0;
+}
+
+.hl-mark {
+  background: var(--highlight);
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop {
+  animation: pop-in 0.14s ease-out;
+}
+
+/* Safe area padding for iOS installed PWA */
+.safe-top { padding-top: max(env(safe-area-inset-top), 0px); }
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0px); }

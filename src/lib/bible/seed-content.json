@@ -1,0 +1,208 @@
+{
+  "verses": [
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 1, "heading": "The Creation", "text": "In the beginning God created the heavens and the earth." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 2, "text": "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 3, "text": "And God said, \"Let there be light,\" and there was light." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 4, "text": "God saw that the light was good, and he separated the light from the darkness." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 5, "text": "God called the light \"day,\" and the darkness he called \"night.\" And there was evening, and there was morning—the first day." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 6, "text": "And God said, \"Let there be a vault between the waters to separate water from water.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 7, "text": "So God made the vault and separated the water under the vault from the water above it. And it was so." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 8, "text": "God called the vault \"sky.\" And there was evening, and there was morning—the second day." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 9, "text": "And God said, \"Let the water under the sky be gathered to one place, and let dry ground appear.\" And it was so." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 10, "text": "God called the dry ground \"land,\" and the gathered waters he called \"seas.\" And God saw that it was good." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 11, "text": "Then God said, \"Let the land produce vegetation: seed-bearing plants and trees on the land that bear fruit with seed in it.\" And it was so." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 12, "text": "The land produced vegetation: plants bearing seed according to their kinds and trees bearing fruit with seed in it. And God saw that it was good." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 13, "text": "And there was evening, and there was morning—the third day." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 14, "text": "And God said, \"Let there be lights in the vault of the sky to separate the day from the night, and let them serve as signs to mark sacred times, and days and years.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 15, "text": "\"And let them be lights in the vault of the sky to give light on the earth.\" And it was so." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 16, "text": "God made two great lights—the greater light to govern the day and the lesser light to govern the night. He also made the stars." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 17, "text": "God set them in the vault of the sky to give light on the earth," },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 18, "text": "to govern the day and the night, and to separate light from darkness. And God saw that it was good." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 19, "text": "And there was evening, and there was morning—the fourth day." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 20, "text": "And God said, \"Let the water teem with living creatures, and let birds fly above the earth across the vault of the sky.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 21, "text": "So God created the great creatures of the sea and every living thing with which the water teems and that moves about in it, and every winged bird. And God saw that it was good." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 22, "text": "God blessed them and said, \"Be fruitful and increase in number and fill the water in the seas, and let the birds increase on the earth.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 23, "text": "And there was evening, and there was morning—the fifth day." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 24, "text": "And God said, \"Let the land produce living creatures according to their kinds: the livestock, the creatures that move along the ground, and the wild animals, each according to its kind.\" And it was so." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 25, "text": "God made the wild animals according to their kinds, the livestock according to their kinds, and all the creatures that move along the ground according to their kinds. And God saw that it was good." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 26, "text": "Then God said, \"Let us make mankind in our image, in our likeness, so that they may rule over the fish in the sea and the birds in the sky, over the livestock and all the wild animals, and over all the creatures that move along the ground.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 27, "text": "So God created mankind in his own image, in the image of God he created them; male and female he created them." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 28, "text": "God blessed them and said to them, \"Be fruitful and increase in number; fill the earth and subdue it. Rule over the fish in the sea and the birds in the sky and over every living creature that moves on the ground.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 29, "text": "Then God said, \"I give you every seed-bearing plant on the face of the whole earth and every tree that has fruit with seed in it. They will be yours for food.\"" },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 30, "text": "\"And to all the beasts of the earth and all the birds in the sky and all the creatures that move along the ground—everything that has the breath of life in it—I give every green plant for food.\" And it was so." },
+    { "translation": "ESV", "book": "genesis", "chapter": 1, "verse": 31, "text": "God saw all that he had made, and it was very good. And there was evening, and there was morning—the sixth day." },
+
+    { "translation": "ESV", "book": "genesis", "chapter": 2, "verse": 1, "heading": "The Seventh Day, God Rests", "text": "Thus the heavens and the earth were completed in all their vast array." },
+    { "translation": "ESV", "book": "genesis", "chapter": 2, "verse": 2, "text": "By the seventh day God had finished the work he had been doing; so on the seventh day he rested from all his work." },
+    { "translation": "ESV", "book": "genesis", "chapter": 2, "verse": 3, "text": "Then God blessed the seventh day and made it holy, because on it he rested from all the work of creating that he had done." },
+
+    { "translation": "ESV", "book": "psalms", "chapter": 23, "verse": 1, "heading": "The Lord Is My Shepherd", "text": "The Lord is my shepherd; I shall not want." },
+    { "translation": "ESV", "book": "psalms", "chapter": 23, "verse": 2, "text": "He makes me lie down in green pastures. He leads me beside still waters." },
+    { "translation": "ESV", "book": "psalms", "chapter": 23, "verse": 3, "text": "He restores my soul. He leads me in paths of righteousness for his name's sake." },
+    { "translation": "ESV", "book": "psalms", "chapter": 23, "verse": 4, "text": "Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me; your rod and your staff, they comfort me." },
+    { "translation": "ESV", "book": "psalms", "chapter": 23, "verse": 5, "text": "You prepare a table before me in the presence of my enemies. You anoint my head with oil; my cup overflows." },
+    { "translation": "ESV", "book": "psalms", "chapter": 23, "verse": 6, "text": "Surely goodness and mercy shall follow me all the days of my life, and I shall dwell in the house of the Lord forever." },
+
+    { "translation": "ESV", "book": "psalms", "chapter": 1, "verse": 1, "heading": "The Way of the Righteous", "text": "Blessed is the one who does not walk in step with the wicked or stand in the way that sinners take or sit in the company of mockers." },
+    { "translation": "ESV", "book": "psalms", "chapter": 1, "verse": 2, "text": "But whose delight is in the law of the Lord, and who meditates on his law day and night." },
+    { "translation": "ESV", "book": "psalms", "chapter": 1, "verse": 3, "text": "That person is like a tree planted by streams of water, which yields its fruit in season and whose leaf does not wither—whatever they do prospers." },
+
+    { "translation": "ESV", "book": "john", "chapter": 1, "verse": 1, "heading": "The Word Became Flesh", "text": "In the beginning was the Word, and the Word was with God, and the Word was God." },
+    { "translation": "ESV", "book": "john", "chapter": 1, "verse": 2, "text": "He was with God in the beginning." },
+    { "translation": "ESV", "book": "john", "chapter": 1, "verse": 3, "text": "Through him all things were made; without him nothing was made that has been made." },
+    { "translation": "ESV", "book": "john", "chapter": 1, "verse": 4, "text": "In him was life, and that life was the light of all mankind." },
+    { "translation": "ESV", "book": "john", "chapter": 1, "verse": 5, "text": "The light shines in the darkness, and the darkness has not overcome it." },
+    { "translation": "ESV", "book": "john", "chapter": 1, "verse": 14, "text": "The Word became flesh and made his dwelling among us. We have seen his glory, the glory of the one and only Son, who came from the Father, full of grace and truth." },
+
+    { "translation": "ESV", "book": "john", "chapter": 3, "verse": 16, "heading": "For God So Loved the World", "text": "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life." },
+    { "translation": "ESV", "book": "john", "chapter": 3, "verse": 17, "text": "For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him." },
+    { "translation": "ESV", "book": "john", "chapter": 3, "verse": 18, "text": "Whoever believes in him is not condemned, but whoever does not believe is condemned already, because he has not believed in the name of the only Son of God." },
+
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 1, "heading": "The Beatitudes", "text": "Seeing the crowds, he went up on the mountain, and when he sat down, his disciples came to him." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 2, "text": "And he opened his mouth and taught them, saying:" },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 3, "text": "Blessed are the poor in spirit, for theirs is the kingdom of heaven." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 4, "text": "Blessed are those who mourn, for they shall be comforted." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 5, "text": "Blessed are the meek, for they shall inherit the earth." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 6, "text": "Blessed are those who hunger and thirst for righteousness, for they shall be satisfied." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 7, "text": "Blessed are the merciful, for they shall receive mercy." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 8, "text": "Blessed are the pure in heart, for they shall see God." },
+    { "translation": "ESV", "book": "matthew", "chapter": 5, "verse": 9, "text": "Blessed are the peacemakers, for they shall be called sons of God." },
+
+    { "translation": "ESV", "book": "philippians", "chapter": 4, "verse": 1, "heading": "Rejoice in the Lord", "text": "Therefore, my brothers, whom I love and long for, my joy and crown, stand firm thus in the Lord, my beloved." },
+    { "translation": "ESV", "book": "philippians", "chapter": 4, "verse": 4, "text": "Rejoice in the Lord always; again I will say, rejoice." },
+    { "translation": "ESV", "book": "philippians", "chapter": 4, "verse": 6, "text": "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God." },
+    { "translation": "ESV", "book": "philippians", "chapter": 4, "verse": 7, "text": "And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus." },
+    { "translation": "ESV", "book": "philippians", "chapter": 4, "verse": 13, "text": "I can do all things through him who strengthens me." },
+    { "translation": "ESV", "book": "philippians", "chapter": 4, "verse": 19, "text": "And my God will supply every need of yours according to his riches in glory in Christ Jesus." },
+
+    { "translation": "ESV", "book": "proverbs", "chapter": 3, "verse": 5, "heading": "Trust in the Lord", "text": "Trust in the Lord with all your heart, and do not lean on your own understanding." },
+    { "translation": "ESV", "book": "proverbs", "chapter": 3, "verse": 6, "text": "In all your ways acknowledge him, and he will make straight your paths." },
+
+    { "translation": "ESV", "book": "romans", "chapter": 8, "verse": 28, "heading": "More Than Conquerors", "text": "And we know that for those who love God all things work together for good, for those who are called according to his purpose." },
+    { "translation": "ESV", "book": "romans", "chapter": 8, "verse": 38, "text": "For I am sure that neither death nor life, nor angels nor rulers, nor things present nor things to come, nor powers," },
+    { "translation": "ESV", "book": "romans", "chapter": 8, "verse": 39, "text": "nor height nor depth, nor anything else in all creation, will be able to separate us from the love of God in Christ Jesus our Lord." },
+
+    { "translation": "ESV", "book": "isaiah", "chapter": 40, "verse": 31, "heading": "They Shall Renew Their Strength", "text": "But they who wait for the Lord shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint." },
+
+    { "translation": "ESV", "book": "jeremiah", "chapter": 29, "verse": 11, "heading": "Plans for Hope", "text": "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope." },
+
+    { "translation": "LSG", "book": "genesis", "chapter": 1, "verse": 1, "heading": "La Création", "text": "Au commencement, Dieu créa les cieux et la terre." },
+    { "translation": "LSG", "book": "genesis", "chapter": 1, "verse": 2, "text": "La terre était informe et vide; il y avait des ténèbres à la surface de l'abîme, et l'Esprit de Dieu se mouvait au-dessus des eaux." },
+    { "translation": "LSG", "book": "genesis", "chapter": 1, "verse": 3, "text": "Dieu dit: Que la lumière soit! Et la lumière fut." },
+    { "translation": "LSG", "book": "genesis", "chapter": 1, "verse": 4, "text": "Dieu vit que la lumière était bonne; et Dieu sépara la lumière d'avec les ténèbres." },
+    { "translation": "LSG", "book": "genesis", "chapter": 1, "verse": 5, "text": "Dieu appela la lumière jour, et il appela les ténèbres nuit. Ainsi, il y eut un soir, et il y eut un matin: ce fut le premier jour." },
+
+    { "translation": "LSG", "book": "psalms", "chapter": 23, "verse": 1, "heading": "L'Éternel est mon berger", "text": "L'Éternel est mon berger: je ne manquerai de rien." },
+    { "translation": "LSG", "book": "psalms", "chapter": 23, "verse": 2, "text": "Il me fait reposer dans de verts pâturages, il me dirige près des eaux paisibles." },
+    { "translation": "LSG", "book": "psalms", "chapter": 23, "verse": 3, "text": "Il restaure mon âme, il me conduit dans les sentiers de la justice, à cause de son nom." },
+    { "translation": "LSG", "book": "psalms", "chapter": 23, "verse": 4, "text": "Quand je marche dans la vallée de l'ombre de la mort, je ne crains aucun mal, car tu es avec moi: ta houlette et ton bâton me rassurent." },
+    { "translation": "LSG", "book": "psalms", "chapter": 23, "verse": 5, "text": "Tu dresses devant moi une table, en face de mes adversaires; tu oins d'huile ma tête, et ma coupe déborde." },
+    { "translation": "LSG", "book": "psalms", "chapter": 23, "verse": 6, "text": "Oui, le bonheur et la grâce m'accompagneront tous les jours de ma vie, et j'habiterai dans la maison de l'Éternel jusqu'à la fin de mes jours." },
+
+    { "translation": "LSG", "book": "john", "chapter": 3, "verse": 16, "heading": "Dieu a tant aimé le monde", "text": "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle." },
+    { "translation": "LSG", "book": "john", "chapter": 3, "verse": 17, "text": "Dieu, en effet, n'a pas envoyé son Fils dans le monde pour qu'il juge le monde, mais pour que le monde soit sauvé par lui." },
+
+    { "translation": "LSG", "book": "philippians", "chapter": 4, "verse": 4, "heading": "Réjouissez-vous", "text": "Réjouissez-vous toujours dans le Seigneur; je le répète, réjouissez-vous." },
+    { "translation": "LSG", "book": "philippians", "chapter": 4, "verse": 6, "text": "Ne vous inquiétez de rien; mais en toute chose faites connaître vos besoins à Dieu par des prières et des supplications, avec des actions de grâces." },
+    { "translation": "LSG", "book": "philippians", "chapter": 4, "verse": 7, "text": "Et la paix de Dieu, qui surpasse toute intelligence, gardera vos cœurs et vos pensées en Jésus-Christ." },
+    { "translation": "LSG", "book": "philippians", "chapter": 4, "verse": 13, "text": "Je puis tout par celui qui me fortifie." },
+
+    { "translation": "LSG", "book": "proverbs", "chapter": 3, "verse": 5, "heading": "Confie-toi en l'Éternel", "text": "Confie-toi en l'Éternel de tout ton cœur, et ne t'appuie pas sur ta sagesse." },
+    { "translation": "LSG", "book": "proverbs", "chapter": 3, "verse": 6, "text": "Reconnais-le dans toutes tes voies, et il aplanira tes sentiers." },
+
+    { "translation": "SW", "book": "psalms", "chapter": 23, "verse": 1, "heading": "Bwana ni Mchungaji Wangu", "text": "Bwana ni mchungaji wangu, sitapungukiwa na kitu." },
+    { "translation": "SW", "book": "psalms", "chapter": 23, "verse": 2, "text": "Katika malisho ya majani mabichi hunilaza, kando ya maji ya utulivu huniongoza." },
+    { "translation": "SW", "book": "psalms", "chapter": 23, "verse": 3, "text": "Hunihuisha nafsi yangu; na kuniongoza katika njia za haki kwa ajili ya jina lake." },
+    { "translation": "SW", "book": "psalms", "chapter": 23, "verse": 4, "text": "Naam, nijapopita kati ya bonde la uvuli wa mauti, sitaogopa mabaya; kwa maana Wewe upo pamoja nami, gongo lako na fimbo yako vyanifariji." },
+    { "translation": "SW", "book": "psalms", "chapter": 23, "verse": 5, "text": "Waandaa meza mbele yangu, machoni pa watesi wangu; umenipaka mafuta kichwani, kikombe changu kinafurika." },
+    { "translation": "SW", "book": "psalms", "chapter": 23, "verse": 6, "text": "Hakika wema na fadhili zitanifuata siku zote za maisha yangu; nami nitakaa nyumbani mwa Bwana milele." },
+
+    { "translation": "SW", "book": "john", "chapter": 3, "verse": 16, "heading": "Mungu Aliupenda Ulimwengu", "text": "Kwa maana jinsi hii Mungu aliupenda ulimwengu, hata akamtoa Mwanawe pekee, ili kila mtu amwaminiye asipotee, bali awe na uzima wa milele." },
+    { "translation": "SW", "book": "john", "chapter": 3, "verse": 17, "text": "Kwa maana Mungu hakumtuma Mwana ulimwenguni ili auhukumu ulimwengu, bali ulimwengu uokolewe katika yeye." },
+
+    { "translation": "SW", "book": "philippians", "chapter": 4, "verse": 6, "heading": "Msifadhaike", "text": "Msijisumbue kwa neno lo lote; bali katika kila neno kwa kusali na kuomba, pamoja na kushukuru, haja zenu na zijulikane na Mungu." },
+    { "translation": "SW", "book": "philippians", "chapter": 4, "verse": 7, "text": "Na amani ya Mungu, ipitayo akili zote, itawahifadhi mioyo yenu na nia zenu katika Kristo Yesu." },
+    { "translation": "SW", "book": "philippians", "chapter": 4, "verse": 13, "text": "Nayaweza mambo yote katika yeye anitiaye nguvu." },
+
+    { "translation": "SW", "book": "proverbs", "chapter": 3, "verse": 5, "heading": "Mtumaini Bwana", "text": "Mtumaini Bwana kwa moyo wako wote, wala usizitegemee akili zako mwenyewe." },
+    { "translation": "SW", "book": "proverbs", "chapter": 3, "verse": 6, "text": "Katika njia zako zote mkiri yeye, naye atayanyosha mapito yako." },
+
+    { "translation": "LIN", "book": "psalms", "chapter": 23, "verse": 1, "heading": "Yawe azali mobateli na ngai", "text": "Yawe azali mobateli na ngai ya mpate, nakozanga eloko te." },
+    { "translation": "LIN", "book": "psalms", "chapter": 23, "verse": 2, "text": "Alalisaka ngai na bilanga ya matiti ya mobesu, akambaka ngai pembeni ya mai ya kimia." },
+    { "translation": "LIN", "book": "psalms", "chapter": 23, "verse": 3, "text": "Azongisaka molimo na ngai, akambaka ngai na banzela ya sembo mpo na nkombo na ye." },
+    { "translation": "LIN", "book": "psalms", "chapter": 23, "verse": 4, "text": "Ata soki nazali kotambola na lobwaku ya elili ya liwa, nakobanga mabe te, mpo yo ozali elongo na ngai; lingenda na yo mpe nzete na yo ebondisaka ngai." },
+    { "translation": "LIN", "book": "psalms", "chapter": 23, "verse": 5, "text": "Obongiselaka ngai mesa liboso ya banguna na ngai; opakolaka ngai mafuta na motó, kopo na ngai etondi." },
+    { "translation": "LIN", "book": "psalms", "chapter": 23, "verse": 6, "text": "Ya solo, bolamu mpe boboto ekolanda ngai mikolo nyonso ya bomoi na ngai; mpe nakofanda na ndako ya Yawe libela na libela." },
+
+    { "translation": "LIN", "book": "john", "chapter": 3, "verse": 16, "heading": "Nzambe alingaki mokili", "text": "Pamba te Nzambe alingaki mokili mingi, yango wana apesaki Mwana na ye se moko, mpo ete moto nyonso oyo andimeli ye akufa te, kasi azala na bomoi ya seko." },
+    { "translation": "LIN", "book": "john", "chapter": 3, "verse": 17, "text": "Pamba te Nzambe atindaki Mwana na ye na mokili te mpo na kokatela mokili etumbu, kasi mpo ete mokili ebika na nzela na ye." },
+
+    { "translation": "LIN", "book": "philippians", "chapter": 4, "verse": 13, "heading": "Nkolo apesaka nguya", "text": "Nakoki kosala makambo nyonso na nzela ya ye oyo apesaka ngai makasi." },
+
+    { "translation": "LIN", "book": "proverbs", "chapter": 3, "verse": 5, "heading": "Tia motema epai ya Yawe", "text": "Tia motema epai ya Yawe na motema na yo mobimba, mpe kotia elikya na mayele na yo moko te." },
+    { "translation": "LIN", "book": "proverbs", "chapter": 3, "verse": 6, "text": "Yeba ye na banzela na yo nyonso, mpe ye akosembola banzela na yo." },
+
+    { "translation": "LUA", "book": "psalms", "chapter": 23, "verse": 1, "heading": "Yehowa udi mulami wanyi", "text": "Yehowa udi mulami wanyi wa mikoko, tshiena mua kupanga tshintu." },
+    { "translation": "LUA", "book": "psalms", "chapter": 23, "verse": 2, "text": "Udi undalaja mu madimi a manyanyi mabishi, udi ungenda pabuipi ne mâyi a ditalala." },
+    { "translation": "LUA", "book": "psalms", "chapter": 23, "verse": 3, "text": "Udi ujingulula muoyo wanyi; udi ungenda mu njila ya buakane bua bualu bua dîna diende." },
+    { "translation": "LUA", "book": "psalms", "chapter": 23, "verse": 4, "text": "Nansha nangenda mu tshibandabanda tshia mudidima wa lufu, tshiena tshitshina tshibi, bualu wewe udi nanyi; dikombo diebe ne mukombo webe bidi bingondesha." },
+    { "translation": "LUA", "book": "psalms", "chapter": 23, "verse": 5, "text": "Udi undongoluela mêsa kumpala kua baluishi banyi; udi ungela mafuta ku mutu, tshikombelu tshianyi tshidi tshiwula." },
+    { "translation": "LUA", "book": "psalms", "chapter": 23, "verse": 6, "text": "Bushuwa, buimpe ne luse nebindonde matuku onso a muoyo wanyi; nengshikale mu nzubu wa Yehowa tshiendelele." },
+
+    { "translation": "LUA", "book": "john", "chapter": 3, "verse": 16, "heading": "Nzambi wakatamba kunanga ba pa buloba", "text": "Bualu Nzambi wakatamba kunanga ba pa buloba, wakafila Muanende umuepele, bua muntu yonso udi umuitabuja kafu, kadi ikale ne muoyo wa tshiendelele." },
+    { "translation": "LUA", "book": "john", "chapter": 3, "verse": 17, "text": "Bualu Nzambi kena mutume Muanende pa buloba bua kulumbulula ba pa buloba, kadi bua ba pa buloba basungidibue muomumue." },
+
+    { "translation": "LUA", "book": "proverbs", "chapter": 3, "verse": 5, "heading": "Eyemena Yehowa", "text": "Eyemena Yehowa ne mutshima webe wonso, kuyi weyemena meji ebe nkayebe." },
+    { "translation": "LUA", "book": "proverbs", "chapter": 3, "verse": 6, "text": "Mumanye mu njila yebe yonso, neyi wewe neakoloole njila yebe." }
+  ],
+  "plans": [
+    {
+      "slug": "7-days-peace",
+      "title": "7 Days of Peace",
+      "subtitle": "Find calm in God's promises",
+      "description": "A gentle week walking through Scriptures that bring peace to an anxious heart.",
+      "category": "Peace",
+      "durationDays": 7,
+      "accent": "blue",
+      "days": [
+        { "day": 1, "title": "Cast your cares", "reference": "Philippians 4:6-7", "readings": [{ "book": "philippians", "chapter": 4 }] },
+        { "day": 2, "title": "The Good Shepherd", "reference": "Psalm 23", "readings": [{ "book": "psalms", "chapter": 23 }] },
+        { "day": 3, "title": "Trust the Lord", "reference": "Proverbs 3:5-6", "readings": [{ "book": "proverbs", "chapter": 3 }] },
+        { "day": 4, "title": "Rejoice always", "reference": "Philippians 4:4-13", "readings": [{ "book": "philippians", "chapter": 4 }] },
+        { "day": 5, "title": "Renewed strength", "reference": "Isaiah 40:31", "readings": [{ "book": "isaiah", "chapter": 40 }] },
+        { "day": 6, "title": "All things for good", "reference": "Romans 8:28-39", "readings": [{ "book": "romans", "chapter": 8 }] },
+        { "day": 7, "title": "The light of life", "reference": "John 1:1-14", "readings": [{ "book": "john", "chapter": 1 }] }
+      ]
+    },
+    {
+      "slug": "beginnings",
+      "title": "In the Beginning",
+      "subtitle": "Discover the story of Creation",
+      "description": "Start at the very beginning and see how God created all things good.",
+      "category": "Foundations",
+      "durationDays": 3,
+      "accent": "green",
+      "days": [
+        { "day": 1, "title": "The Creation", "reference": "Genesis 1", "readings": [{ "book": "genesis", "chapter": 1 }] },
+        { "day": 2, "title": "The Seventh Day", "reference": "Genesis 2:1-3", "readings": [{ "book": "genesis", "chapter": 2 }] },
+        { "day": 3, "title": "The Word Made Flesh", "reference": "John 1", "readings": [{ "book": "john", "chapter": 1 }] }
+      ]
+    },
+    {
+      "slug": "gospel-of-hope",
+      "title": "The Gospel of Hope",
+      "subtitle": "God's love for the world",
+      "description": "Meet Jesus and the hope he offers to everyone who believes.",
+      "category": "Hope",
+      "durationDays": 5,
+      "accent": "gold",
+      "days": [
+        { "day": 1, "title": "For God so loved", "reference": "John 3:16-18", "readings": [{ "book": "john", "chapter": 3 }] },
+        { "day": 2, "title": "The Beatitudes", "reference": "Matthew 5:1-9", "readings": [{ "book": "matthew", "chapter": 5 }] },
+        { "day": 3, "title": "Plans for hope", "reference": "Jeremiah 29:11", "readings": [{ "book": "jeremiah", "chapter": 29 }] },
+        { "day": 4, "title": "More than conquerors", "reference": "Romans 8:28-39", "readings": [{ "book": "romans", "chapter": 8 }] },
+        { "day": 5, "title": "The blessed life", "reference": "Psalm 1", "readings": [{ "book": "psalms", "chapter": 1 }] }
+      ]
+    }
+  ]
+}
