@@ -291,11 +291,13 @@ export default function SettingsPage() {
             <span className="text-xl">A</span>
           </div>
           <p
-            className="scripture mt-3 border-t border-line pt-3"
+            className="scripture verse-row mt-3 border-t border-line pt-3"
             style={{ fontSize: `${17 * settings.textScale}px` }}
           >
+            <span className="verse-text">
+              In the beginning God created the heavens and the earth.
+            </span>
             <span className="verse-num">1</span>
-            In the beginning God created the heavens and the earth.
           </p>
         </div>
 

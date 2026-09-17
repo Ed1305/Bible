@@ -289,17 +289,17 @@ function ListenInner() {
         ) : (
           <div className="scripture text-[16px]">
             {verses.map((v, i) => (
-              <span
+              <p
                 key={v.verse}
                 onClick={() => play(i)}
                 className={
-                  "cursor-pointer rounded transition-colors " +
-                  (i === current ? "bg-highlight" : "")
+                  "verse-row cursor-pointer transition-colors " +
+                  (i === current ? "is-active" : "")
                 }
               >
+                <span className="verse-text">{v.text}</span>
                 <span className="verse-num">{v.verse}</span>
-                {v.text}{" "}
-              </span>
+              </p>
             ))}
           </div>
         )}

@@ -141,7 +141,6 @@ export default function SearchPage() {
                   {bookName(r.book, lang)} {r.chapter}:{r.verse} · {tr.abbr}
                 </p>
                 <p className="scripture mt-1.5 text-[15px] leading-relaxed">
-                  <span className="verse-num">{r.verse}</span>
                   <Highlighted text={r.text} term={q.trim()} />
                 </p>
               </Link>

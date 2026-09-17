@@ -230,75 +230,77 @@ export default function ReaderPage() {
               const hl = isHighlighted(book, chapter, v.verse);
               const hasNote = !!getNote(book, chapter, v.verse);
               return (
-                <span key={v.verse}>
+                <div key={v.verse} className="relative">
                   {v.heading && (
-                    <h2 className="mb-2 mt-6 font-sans text-[15px] font-bold text-ink">
+                    <h2 className="mb-1 mt-5 font-sans text-[15px] font-bold text-ink">
                       {v.heading}
                     </h2>
                   )}
-                  <span className="relative">
-                    <span
-                      onClick={() => setSelected(active ? null : v.verse)}
-                      className={
-                        "cursor-pointer rounded transition-colors " +
-                        (active ? "bg-highlight/70 " : hl ? "hl-mark " : "")
-                      }
-                    >
-                      <span className="verse-num">{v.verse}</span>
-                      {v.text}{" "}
+                  <p
+                    onClick={() => setSelected(active ? null : v.verse)}
+                    className={
+                      "verse-row cursor-pointer transition-colors " +
+                      (active ? "is-active " : "") +
+                      (hl ? "is-highlighted " : "")
+                    }
+                  >
+                    <span className="verse-text">
+                      {hl && <span aria-hidden="true">★ </span>}
+                      {v.text}
                       {hasNote && (
-                        <PenIcon className="mb-1 inline h-3.5 w-3.5 text-accent" />
+                        <PenIcon className="mb-0.5 ml-1 inline h-3.5 w-3.5 text-accent" />
                       )}
                     </span>
+                    <span className="verse-num">{v.verse}</span>
+                  </p>
 
-                    {active && (
-                      <span
-                        ref={toolbarRef}
-                        className="animate-pop absolute left-0 top-full z-20 mt-1 flex items-center gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-float"
+                  {active && (
+                    <div
+                      ref={toolbarRef}
+                      className="animate-pop absolute left-0 top-full z-20 mt-1 flex items-center gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-float"
+                    >
+                      <ToolbarBtn
+                        label={t.note}
+                        onClick={() => {
+                          setNoteFor(v.verse);
+                          setNoteDraft(getNote(book, chapter, v.verse));
+                        }}
                       >
-                        <ToolbarBtn
-                          label={t.note}
-                          onClick={() => {
-                            setNoteFor(v.verse);
-                            setNoteDraft(getNote(book, chapter, v.verse));
-                          }}
-                        >
-                          <PenIcon className="h-5 w-5 text-ink" />
-                        </ToolbarBtn>
-                        <ToolbarBtn
-                          label={t.highlight}
-                          onClick={() => {
-                            toggleHighlight(book, chapter, v.verse);
-                            setSelected(null);
-                          }}
-                        >
-                          <HeartIcon
-                            className={"h-5 w-5 " + (hl ? "fill-gold text-gold" : "text-ink")}
-                          />
-                        </ToolbarBtn>
-                        <ToolbarBtn label={t.share} onClick={() => onShare(v.verse, v.text)}>
-                          <ShareIcon className="h-5 w-5 text-ink" />
-                        </ToolbarBtn>
-                        <ToolbarBtn
-                          label={t.bookmark}
-                          onClick={() => {
-                            toggleBookmark(book, chapter, v.verse);
-                            showToast(isBookmarked(book, chapter, v.verse) ? "Removed" : "Bookmarked");
-                          }}
-                        >
-                          <BookmarkIcon
-                            className={
-                              "h-5 w-5 " +
-                              (isBookmarked(book, chapter, v.verse)
-                                ? "fill-verdant text-verdant"
-                                : "text-ink")
-                            }
-                          />
-                        </ToolbarBtn>
-                      </span>
-                    )}
-                  </span>{" "}
-                </span>
+                        <PenIcon className="h-5 w-5 text-ink" />
+                      </ToolbarBtn>
+                      <ToolbarBtn
+                        label={t.highlight}
+                        onClick={() => {
+                          toggleHighlight(book, chapter, v.verse);
+                          setSelected(null);
+                        }}
+                      >
+                        <HeartIcon
+                          className={"h-5 w-5 " + (hl ? "fill-gold text-gold" : "text-ink")}
+                        />
+                      </ToolbarBtn>
+                      <ToolbarBtn label={t.share} onClick={() => onShare(v.verse, v.text)}>
+                        <ShareIcon className="h-5 w-5 text-ink" />
+                      </ToolbarBtn>
+                      <ToolbarBtn
+                        label={t.bookmark}
+                        onClick={() => {
+                          toggleBookmark(book, chapter, v.verse);
+                          showToast(isBookmarked(book, chapter, v.verse) ? "Removed" : "Bookmarked");
+                        }}
+                      >
+                        <BookmarkIcon
+                          className={
+                            "h-5 w-5 " +
+                            (isBookmarked(book, chapter, v.verse)
+                              ? "fill-verdant text-verdant"
+                              : "text-ink")
+                          }
+                        />
+                      </ToolbarBtn>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
