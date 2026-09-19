@@ -1,16 +1,16 @@
 'use client'
 
 /**
- * /control — what the operator drives. Open it in any browser tab, or on a
- * phone. Nothing here touches OBS directly; it POSTs to /api/live-verse and
- * the /display page (polling every second) picks it up.
- *
- * No login is required here — anyone with this URL can change what's on
- * screen. That's the simplest option for launch; if you want to lock it
- * down later, put the /api/live-verse POST behind a check.
+ * /control — what the operator drives. Pick translation, book, chapter and
+ * verse(s); the text is looked up from the app's own /api/chapter endpoint
+ * (same data source the reader uses, including its offline-pack fallback)
+ * rather than typed by hand. Reference/body stay editable afterward in case
+ * you want to trim or annotate before pushing.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { BOOKS } from '@/lib/bible/books'
+import { TRANSLATIONS, getTranslation } from '@/lib/bible/translations'
 
 type LiveVerse = {
   id: number
@@ -21,16 +21,31 @@ type LiveVerse = {
   updated_at: string
 }
 
+type ChapterVerse = { verse: number; heading: string | null; text: string }
+
 const POLL_MS = 2000
 
 export default function Control() {
+  const [translationCode, setTranslationCode] = useState('ESV')
+  const [bookSlug, setBookSlug] = useState('john')
+  const [chapter, setChapter] = useState(3)
+  const [chapterVerses, setChapterVerses] = useState<ChapterVerse[]>([])
+  const [loadingChapter, setLoadingChapter] = useState(false)
+  const [startVerse, setStartVerse] = useState(16)
+  const [endVerse, setEndVerse] = useState<number | ''>('')
+
   const [reference, setReference] = useState('')
   const [body, setBody] = useState('')
-  const [translation, setTranslation] = useState('KJV')
+
   const [live, setLive] = useState<LiveVerse | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
+  const book = useMemo(() => BOOKS.find(b => b.slug === bookSlug), [bookSlug])
+  const lang = useMemo(() => getTranslation(translationCode).lang, [translationCode])
+  const displayName = book ? book.names[lang] ?? book.names.en : bookSlug
+
+  // Poll what's currently live, to show status + let /display stay in sync.
   useEffect(() => {
     let dead = false
     const load = async () => {
@@ -51,9 +66,48 @@ export default function Control() {
     }
   }, [])
 
+  // Fetch the chapter whenever translation/book/chapter changes.
+  useEffect(() => {
+    let dead = false
+    setLoadingChapter(true)
+    fetch(`/api/chapter?translation=${translationCode}&book=${bookSlug}&chapter=${chapter}`)
+      .then(res => res.json())
+      .then(data => {
+        if (dead) return
+        const vs: ChapterVerse[] = data.verses ?? []
+        setChapterVerses(vs)
+        setStartVerse(v => (vs.some(x => x.verse === v) ? v : (vs[0]?.verse ?? 1)))
+      })
+      .catch(() => {
+        if (!dead) setChapterVerses([])
+      })
+      .finally(() => {
+        if (!dead) setLoadingChapter(false)
+      })
+    return () => {
+      dead = true
+    }
+  }, [translationCode, bookSlug, chapter])
+
+  // Recompute reference + body whenever the selection changes.
+  useEffect(() => {
+    if (chapterVerses.length === 0) return
+    const from = startVerse
+    const to = endVerse === '' ? from : Math.max(from, Number(endVerse))
+    const picked = chapterVerses.filter(v => v.verse >= from && v.verse <= to)
+    if (picked.length === 0) return
+
+    const ref =
+      to > from
+        ? `${displayName} ${chapter}:${from}-${to}`
+        : `${displayName} ${chapter}:${from}`
+    setReference(ref)
+    setBody(picked.map(v => v.text).join(' '))
+  }, [chapterVerses, startVerse, endVerse, chapter, displayName])
+
   const push = async (visible: boolean) => {
     if (visible && !body.trim()) {
-      setError('Enter the verse text first')
+      setError('Pick a verse first')
       return
     }
     setError('')
@@ -65,7 +119,7 @@ export default function Control() {
         body: JSON.stringify({
           reference: reference.trim(),
           body: body.trim(),
-          translation: translation.trim(),
+          translation: translationCode,
           visible,
         }),
       })
@@ -87,7 +141,7 @@ export default function Control() {
         body: JSON.stringify({
           reference: live?.reference ?? '',
           body: live?.body ?? '',
-          translation: live?.translation ?? translation,
+          translation: live?.translation ?? translationCode,
           visible: false,
         }),
       })
@@ -101,7 +155,7 @@ export default function Control() {
   return (
     <main
       style={{
-        maxWidth: 720,
+        maxWidth: 760,
         margin: '0 auto',
         padding: '32px 20px 80px',
         fontFamily: 'system-ui, sans-serif',
@@ -135,23 +189,111 @@ export default function Control() {
         )}
       </div>
 
-      <label style={label}>Reference</label>
-      <input
-        value={reference}
-        onChange={e => setReference(e.target.value)}
-        placeholder="1 Kings 7:46"
-        style={input}
-      />
+      {/* --- Pickers --- */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div>
+          <label style={label}>Translation</label>
+          <select
+            value={translationCode}
+            onChange={e => setTranslationCode(e.target.value)}
+            style={input}
+          >
+            {TRANSLATIONS.map(t => (
+              <option key={t.code} value={t.code}>
+                {t.abbr} — {t.language}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <label style={label}>Translation</label>
-      <input
-        value={translation}
-        onChange={e => setTranslation(e.target.value)}
-        placeholder="KJV"
-        style={input}
-      />
+        <div>
+          <label style={label}>Book</label>
+          <select
+            value={bookSlug}
+            onChange={e => {
+              setBookSlug(e.target.value)
+              setChapter(1)
+            }}
+            style={input}
+          >
+            <optgroup label="Old Testament">
+              {BOOKS.filter(b => b.testament === 'OT').map(b => (
+                <option key={b.slug} value={b.slug}>
+                  {b.names[lang] ?? b.names.en}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="New Testament">
+              {BOOKS.filter(b => b.testament === 'NT').map(b => (
+                <option key={b.slug} value={b.slug}>
+                  {b.names[lang] ?? b.names.en}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+        </div>
 
-      <label style={label}>Verse</label>
+        <div>
+          <label style={label}>Chapter</label>
+          <select
+            value={chapter}
+            onChange={e => setChapter(Number(e.target.value))}
+            style={input}
+          >
+            {Array.from({ length: book?.chapters ?? 1 }, (_, i) => i + 1).map(c => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <label style={label}>Verse</label>
+            <select
+              value={startVerse}
+              onChange={e => setStartVerse(Number(e.target.value))}
+              style={input}
+              disabled={loadingChapter || chapterVerses.length === 0}
+            >
+              {chapterVerses.map(v => (
+                <option key={v.verse} value={v.verse}>
+                  {v.verse}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={label}>To (optional)</label>
+            <select
+              value={endVerse}
+              onChange={e => setEndVerse(e.target.value === '' ? '' : Number(e.target.value))}
+              style={input}
+              disabled={loadingChapter || chapterVerses.length === 0}
+            >
+              <option value="">—</option>
+              {chapterVerses
+                .filter(v => v.verse >= startVerse)
+                .map(v => (
+                  <option key={v.verse} value={v.verse}>
+                    {v.verse}
+                  </option>
+                ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {loadingChapter && (
+        <p style={{ fontSize: 13, color: '#888', marginTop: 8 }}>Loading chapter…</p>
+      )}
+
+      {/* --- Preview / manual tweak --- */}
+      <label style={{ ...label, marginTop: 24 }}>Reference</label>
+      <input value={reference} onChange={e => setReference(e.target.value)} style={input} />
+
+      <label style={label}>Verse text</label>
       <textarea
         value={body}
         onChange={e => {
@@ -159,7 +301,6 @@ export default function Control() {
           if (error) setError('')
         }}
         rows={5}
-        placeholder="In the plain of Jordan did the king cast them…"
         style={{ ...input, resize: 'vertical', lineHeight: 1.5 }}
       />
 
@@ -204,6 +345,7 @@ const input: React.CSSProperties = {
   fontFamily: 'inherit',
   boxSizing: 'border-box',
   marginBottom: 12,
+  background: '#fff',
 }
 
 const primary: React.CSSProperties = {
