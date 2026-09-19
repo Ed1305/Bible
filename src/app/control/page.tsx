@@ -51,9 +51,15 @@ export default function Control() {
     const load = async () => {
       try {
         const res = await fetch('/api/live-verse', { cache: 'no-store' })
-        if (!res.ok) return
         const data = await res.json()
-        if (!dead && data) setLive(data as LiveVerse)
+        if (!res.ok) {
+          if (!dead) setError(typeof data.error === 'string' ? data.error : 'Could not load live verse')
+          return
+        }
+        if (!dead && data) {
+          setLive(data as LiveVerse)
+          setError('')
+        }
       } catch {
         // next poll picks it up
       }
