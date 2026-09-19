@@ -2,9 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import BottomNav from "@/components/BottomNav";
-import OfflineBanner from "@/components/OfflineBanner";
-import StatusBar from "@/components/StatusBar";
+import AppShell from "@/components/AppShell";
 
 const THEME_SCRIPT = `(function(){try{var s=JSON.parse(localStorage.getItem("bible.settings")||"{}");if(s.theme==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}})();`;
 
@@ -62,12 +60,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="bg-bg text-ink antialiased">
         <Providers>
-          <OfflineBanner />
-          <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col bg-bg">
-            <StatusBar />
-            <main className="flex-1 pb-24">{children}</main>
-          </div>
-          <BottomNav />
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>

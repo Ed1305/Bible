@@ -58,6 +58,13 @@ html {
   background: var(--bg);
 }
 
+/* OBS Browser Source — camera shows through; only the lower-third is painted. */
+html[data-overlay="1"],
+html[data-overlay="1"] body {
+  background: transparent !important;
+  color: transparent;
+}
+
 body {
   background: var(--bg);
   color: var(--text);

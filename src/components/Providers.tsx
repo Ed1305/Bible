@@ -10,6 +10,10 @@ function ThemeSync() {
     const root = document.documentElement;
     root.setAttribute("data-theme", settings.theme);
     const meta = document.querySelector('meta[name="theme-color"]');
+    if (window.location.pathname.startsWith("/display")) {
+      if (meta) meta.setAttribute("content", "transparent");
+      return;
+    }
     if (meta) {
       meta.setAttribute("content", settings.theme === "dark" ? "#11151c" : "#f4f7fb");
     }
@@ -20,6 +24,7 @@ function ThemeSync() {
 
 export default function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
+    if (window.location.pathname.startsWith("/display")) return;
     if ("serviceWorker" in navigator) {
       const onLoad = () => {
         navigator.serviceWorker.register("/sw.js").catch(() => {

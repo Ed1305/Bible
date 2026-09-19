@@ -30,52 +30,55 @@ const POLL_MS = 1000
 const css = `
   html, body {
     background: transparent !important;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    width: 1920px;
-    height: 1080px;
+    background-color: rgba(0,0,0,0) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   .stage {
-    position: absolute;
-    left: 96px;
-    right: 96px;
-    bottom: 96px;
-    display: flex;
-    justify-content: flex-start;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: transparent;
   }
 
   .panel {
+    position: absolute;
+    left: 4.5%;
+    right: 4.5%;
+    bottom: 6.5%;
     display: flex;
     align-items: stretch;
-    max-width: 1560px;
-    border-radius: 6px;
+    border-radius: 8px;
     background: linear-gradient(90deg,
         rgba(14,26,48,0.96) 0%,
         rgba(27,44,76,0.94) 55%,
         rgba(27,44,76,0.86) 100%);
     opacity: 0;
-    transform: translateX(-40px);
+    transform: translateY(24px);
     transition: opacity ${FADE_MS}ms ease,
                 transform ${FADE_MS}ms cubic-bezier(.16,.84,.44,1);
     will-change: opacity, transform;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.28);
   }
-  .panel.on { opacity: 1; transform: translateX(0); }
+  .panel.on { opacity: 1; transform: translateY(0); }
 
   .bar {
     width: 9px;
     flex: none;
-    border-radius: 6px 0 0 6px;
+    border-radius: 8px 0 0 8px;
     background: linear-gradient(180deg, #E4BC72, #A8792C);
   }
 
-  .inner { padding: 34px 58px 38px 40px; }
+  .inner { padding: 28px 48px 32px 36px; }
 
   .reference {
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 34px;
-    letter-spacing: 5px;
+    font-size: 28px;
+    letter-spacing: 4px;
     text-transform: uppercase;
     color: #E4BC72;
     white-space: nowrap;
@@ -83,19 +86,20 @@ const css = `
 
   .translation {
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 24px;
-    letter-spacing: 3px;
+    font-size: 20px;
+    letter-spacing: 2px;
     color: rgba(240,230,210,0.55);
-    margin-left: 18px;
+    margin-left: 16px;
   }
 
   .body {
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 50px;
-    line-height: 1.34;
+    font-size: 42px;
+    line-height: 1.35;
     color: #F6EEE0;
-    margin-top: 16px;
-    max-width: 1440px;
+    margin-top: 12px;
+    white-space: pre-wrap;
+    word-spacing: 0.06em;
   }
 `
 
