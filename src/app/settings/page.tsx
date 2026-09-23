@@ -36,6 +36,7 @@ export default function SettingsPage() {
   const [progress, setProgress] = useState<{ code: string; done: number; total: number } | null>(
     null,
   );
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -79,9 +80,17 @@ export default function SettingsPage() {
 
   const onDownload = async (code: string) => {
     setBusy(code);
+    setDownloadError(null);
     setProgress({ code, done: 0, total: 1 });
     try {
-      await downloadPack(code, (p) => setProgress({ code, done: p.done, total: p.total }));
+      const result = await downloadPack(code, (p) => setProgress({ code, done: p.done, total: p.total }));
+      if (result.failed.length > 0) {
+        setDownloadError(
+          `${result.failed.length} book${result.failed.length === 1 ? "" : "s"} failed. Tap Continue to retry.`,
+        );
+      }
+    } catch {
+      setDownloadError("Download failed. Check your connection and try again.");
     } finally {
       setBusy(null);
       setProgress(null);
@@ -147,6 +156,9 @@ export default function SettingsPage() {
           </h2>
         </div>
         <p className="mb-3 px-1 text-[12px] leading-relaxed text-muted">{t.offlinePacksHint}</p>
+        {downloadError && (
+          <p className="mb-3 rounded-2xl bg-surface-2 px-4 py-2 text-[12px] text-muted">{downloadError}</p>
+        )}
 
         <ul className="mb-6 space-y-2.5">
           {(manifest?.packs ?? []).map((pack) => {

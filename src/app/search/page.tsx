@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { bookName } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
+import { ReadLink } from "@/components/ReadLink";
 import { Chip } from "@/components/ui";
 import { BackIcon, SearchIcon, CloseIcon } from "@/components/icons";
 
@@ -133,8 +134,10 @@ export default function SearchPage() {
         <ul className="space-y-3 pb-6">
           {results.map((r) => (
             <li key={`${r.book}-${r.chapter}-${r.verse}`}>
-              <Link
-                href={`/read/${settings.translation}/${r.book}/${r.chapter}`}
+              <ReadLink
+                translation={settings.translation}
+                book={r.book}
+                chapter={r.chapter}
                 className="block rounded-[18px] border border-line bg-surface p-4 shadow-soft"
               >
                 <p className="text-[12px] font-semibold text-accent">
@@ -143,7 +146,7 @@ export default function SearchPage() {
                 <p className="scripture mt-1.5 text-[15px] leading-relaxed">
                   <Highlighted text={r.text} term={q.trim()} />
                 </p>
-              </Link>
+              </ReadLink>
             </li>
           ))}
         </ul>

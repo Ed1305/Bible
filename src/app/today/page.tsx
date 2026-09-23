@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { getTranslation } from "@/lib/bible/translations";
 import { bookName } from "@/lib/bible/books";
+import { ReadLink } from "@/components/ReadLink";
 import { ChevronRight, SunIcon } from "@/components/icons";
 
 interface PlanRow {
@@ -63,8 +64,10 @@ export default function TodayPage() {
       </header>
 
       {/* Verse of the day */}
-      <Link
-        href={`/read/ESV/${votd.book}/${votd.chapter}`}
+      <ReadLink
+        translation="ESV"
+        book={votd.book}
+        chapter={votd.chapter}
         className="mt-4 block overflow-hidden rounded-[20px] bg-gradient-to-br from-[#2b3a55] to-[#41618f] p-5 text-white shadow-soft"
       >
         <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
@@ -76,7 +79,7 @@ export default function TodayPage() {
         <p className="mt-3 text-[13px] font-medium text-white/80">
           {bookName(votd.book, lang)} {votd.chapter}:{votd.verse} · {tr.abbr}
         </p>
-      </Link>
+      </ReadLink>
 
       {/* Plans */}
       <h2 className="mb-3 mt-6 text-[13px] font-semibold uppercase tracking-wider text-muted">

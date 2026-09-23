@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { BOOKS, bookName, type BookMeta } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
+import { getOfflineAvailability } from "@/lib/offline";
+import { ReadLink } from "@/components/ReadLink";
 import { Avatar, Segmented, Sheet } from "@/components/ui";
 import {
   SearchIcon,
@@ -27,10 +29,27 @@ export default function BibleHome() {
   const testament = settings.lastTestament;
 
   useEffect(() => {
+    let on = true;
+    const merge = (next: AvailMap) => {
+      if (!on) return;
+      setAvail((prev) => {
+        const out: AvailMap = { ...prev };
+        for (const [code, books] of Object.entries(next)) {
+          out[code] = { ...(out[code] ?? {}), ...books };
+        }
+        return out;
+      });
+    };
     fetch("/api/available")
       .then((r) => r.json())
-      .then((d) => setAvail(d.available ?? {}))
-      .catch(() => setAvail({}));
+      .then((d) => merge(d.available ?? {}))
+      .catch(() => {
+        /* offline — downloaded packs still mark books as available */
+      });
+    void getOfflineAvailability().then(merge);
+    return () => {
+      on = false;
+    };
   }, []);
 
   // Per-book badge counts for the active translation.
@@ -108,8 +127,10 @@ export default function BibleHome() {
 
       {/* Continue reading */}
       {user.lastRead && (
-        <Link
-          href={`/read/${user.lastRead.translation}/${user.lastRead.book}/${user.lastRead.chapter}`}
+        <ReadLink
+          translation={user.lastRead.translation}
+          book={user.lastRead.book}
+          chapter={user.lastRead.chapter}
           className="mt-4 flex items-center justify-between rounded-[18px] bg-gradient-to-r from-accent to-[#41618f] p-4 text-white shadow-soft"
         >
           <div>
@@ -121,7 +142,7 @@ export default function BibleHome() {
             </p>
           </div>
           <ChevronRight className="h-5 w-5 text-white/80" />
-        </Link>
+        </ReadLink>
       )}
 
       {/* Testament toggle */}
@@ -202,14 +223,15 @@ export default function BibleHome() {
           </p>
           <div className="grid grid-cols-6 gap-2">
             {Array.from({ length: picking.chapters }, (_, i) => i + 1).map((c) => (
-              <Link
+              <ReadLink
                 key={c}
-                href={`/read/${settings.translation}/${picking.slug}/${c}`}
-                onClick={() => setPicking(null)}
+                translation={settings.translation}
+                book={picking.slug}
+                chapter={c}
                 className="grid h-11 place-items-center rounded-xl bg-surface-2 text-sm font-medium text-ink hover:bg-line"
               >
                 {c}
-              </Link>
+              </ReadLink>
             ))}
           </div>
         </Sheet>

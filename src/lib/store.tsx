@@ -12,7 +12,7 @@ import {
 import { DEFAULT_TRANSLATION, getTranslation } from "./bible/translations";
 import { BOOKS_BY_SLUG, type LangCode, type Testament } from "./bible/books";
 import { ui, type UiStrings } from "./bible/i18n";
-import { getOfflineChapter } from "./offline";
+import { getOfflineChapterAny } from "./offline";
 
 export type ThemeMode = "light" | "dark";
 
@@ -341,14 +341,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     async (translation: string, book: string, chapter: number): Promise<ChapterData> => {
       const cached = getCachedChapter(translation, book, chapter);
 
-      // 1. Offline-first: full translations downloaded into IndexedDB need no network.
+      // 1. Offline-first: IndexedDB, Cache Storage, then bundled /bible JSON.
       try {
-        const offlineVerses = await getOfflineChapter(translation, book, chapter);
-        if (offlineVerses && offlineVerses.length > 0) {
-          return { translation, book, chapter, verses: offlineVerses };
+        const offline = await getOfflineChapterAny(translation, book, chapter);
+        if (offline && offline.verses.length > 0) {
+          const data = { translation: offline.translation, book, chapter, verses: offline.verses };
+          try {
+            localStorage.setItem(chapterCacheKey(data.translation, book, chapter), JSON.stringify(data));
+          } catch {
+            /* ignore quota */
+          }
+          return data;
         }
       } catch {
-        /* IndexedDB unavailable — continue with other sources */
+        /* device storage unavailable — continue with other sources */
       }
 
       // 2. Network (DB / bundled packs / upstream), mirrored into localStorage.

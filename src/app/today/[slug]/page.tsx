@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { bookName } from "@/lib/bible/books";
+import { ReadLink } from "@/components/ReadLink";
 import { TopBar } from "@/components/ui";
 import { CheckIcon, ChevronRight } from "@/components/icons";
 
@@ -100,12 +100,10 @@ export default function PlanDetail() {
                 >
                   {isDone ? <CheckIcon className="h-5 w-5" /> : <span className="text-sm font-semibold">{d.day}</span>}
                 </button>
-                <Link
-                  href={
-                    first
-                      ? `/read/${settings.translation}/${first.book}/${first.chapter}`
-                      : "#"
-                  }
+                <ReadLink
+                  translation={settings.translation}
+                  book={first?.book ?? "genesis"}
+                  chapter={first?.chapter ?? 1}
                   className="flex flex-1 items-center justify-between"
                 >
                   <div>
@@ -120,7 +118,7 @@ export default function PlanDetail() {
                     </p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted" />
-                </Link>
+                </ReadLink>
               </li>
             );
           })}

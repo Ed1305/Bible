@@ -1,11 +1,12 @@
 import { createStore, get, set, del, keys, type UseStore } from "idb-keyval";
+import { BOOKS_BY_SLUG } from "./bible/books";
 
 /**
  * Client-side offline Bible storage.
  *
  * Full translations ("packs") live in `public/bible/<CODE>/<book>.json` and are
- * downloaded into IndexedDB book-by-book, so a phone with zero signal can read
- * the entire Bible. Chapter reads go through here first, before any network.
+ * downloaded into IndexedDB + Cache Storage book-by-book, so a phone with zero
+ * signal can read the entire Bible. Chapter reads go through here first.
  */
 
 export interface PackMeta {
@@ -41,6 +42,8 @@ export interface PackState {
 export type OfflineIndex = Record<string, PackState>;
 
 const INDEX_KEY = "bible.offline.index";
+const MANIFEST_KEY = "bible.offline.manifest";
+export const BIBLE_PACK_CACHE = "lumina-bible-packs";
 const bookKey = (code: string, book: string) => `bible.offline.book.${code}.${book}`;
 
 // Dedicated IndexedDB database so Bible data never collides with other storage.
@@ -51,15 +54,44 @@ function getStore(): UseStore | null {
   return store;
 }
 
+function versesFromBook(
+  data: OfflineChapter | null | undefined,
+  chapter: number,
+): { verse: number; heading: null; text: string }[] | null {
+  const verses = data?.chapters?.[String(chapter)];
+  if (!verses || verses.length === 0) return null;
+  const rows = verses
+    .map((text, i) => ({ verse: i + 1, heading: null as null, text }))
+    .filter((v) => v.text);
+  return rows.length > 0 ? rows : null;
+}
+
 /* ------------------------------- manifest ------------------------------- */
 
 let manifestPromise: Promise<BibleManifest | null> | null = null;
 
 export function loadManifest(): Promise<BibleManifest | null> {
   if (!manifestPromise) {
-    manifestPromise = fetch("/bible/manifest.json", { cache: "force-cache" })
-      .then((r) => (r.ok ? (r.json() as Promise<BibleManifest>) : null))
-      .catch(() => null);
+    manifestPromise = (async () => {
+      try {
+        const res = await fetch("/bible/manifest.json");
+        if (res.ok) {
+          const data = (await res.json()) as BibleManifest;
+          const s = getStore();
+          if (s) await set(MANIFEST_KEY, data, s);
+          return data;
+        }
+      } catch {
+        /* offline — fall through to IndexedDB */
+      }
+      const s = getStore();
+      if (!s) return null;
+      try {
+        return ((await get<BibleManifest>(MANIFEST_KEY, s)) as BibleManifest) ?? null;
+      } catch {
+        return null;
+      }
+    })();
   }
   return manifestPromise;
 }
@@ -83,31 +115,126 @@ export async function getPackState(code: string): Promise<PackState | null> {
 
 export async function isPackDownloaded(code: string): Promise<boolean> {
   const [manifest, state] = await Promise.all([loadManifest(), getPackState(code)]);
+  if (!state || state.books.length === 0) return false;
   const pack = manifest?.packs.find((p) => p.code === code);
-  if (!pack || !state) return false;
-  return pack.files.every((b) => state.books.includes(b));
+  if (pack) return pack.files.every((b) => state.books.includes(b));
+  // Manifest missing offline — 66 books is a complete Protestant pack.
+  return state.books.length >= 66;
+}
+
+/** Chapter map for every downloaded pack, used when `/api/available` is unreachable. */
+export async function getOfflineAvailability(): Promise<Record<string, Record<string, number[]>>> {
+  const [manifest, index] = await Promise.all([loadManifest(), getOfflineIndex()]);
+  const out: Record<string, Record<string, number[]>> = {};
+  for (const [code, state] of Object.entries(index)) {
+    const files = manifest?.packs.find((p) => p.code === code)?.files ?? state.books;
+    out[code] = {};
+    for (const book of files) {
+      const meta = BOOKS_BY_SLUG[book];
+      const count = meta?.chapters ?? 1;
+      out[code][book] = Array.from({ length: count }, (_, i) => i + 1);
+    }
+  }
+  return out;
 }
 
 /* -------------------------------- chapters ------------------------------- */
 
-/** Read one chapter straight from IndexedDB. No network, ever. */
+async function readBookFromIdb(code: string, book: string): Promise<OfflineChapter | null> {
+  const s = getStore();
+  if (!s) return null;
+  try {
+    return ((await get<OfflineChapter>(bookKey(code, book), s)) as OfflineChapter) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function persistBook(code: string, book: string, data: OfflineChapter): Promise<void> {
+  const s = getStore();
+  if (!s) return;
+  try {
+    await set(bookKey(code, book), data, s);
+  } catch {
+    /* quota — reading from Cache Storage still works */
+  }
+}
+
+async function readBookFromCache(code: string, book: string): Promise<OfflineChapter | null> {
+  if (typeof caches === "undefined") return null;
+  try {
+    const cache = await caches.open(BIBLE_PACK_CACHE);
+    const res = await cache.match(`/bible/${code}/${book}.json`);
+    if (!res || !res.ok) return null;
+    return (await res.json()) as OfflineChapter;
+  } catch {
+    return null;
+  }
+}
+
+async function readBookFromNetwork(code: string, book: string): Promise<OfflineChapter | null> {
+  try {
+    const res = await fetch(`/bible/${code}/${book}.json`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as OfflineChapter;
+    if (typeof caches !== "undefined") {
+      try {
+        const cache = await caches.open(BIBLE_PACK_CACHE);
+        await cache.put(`/bible/${code}/${book}.json`, new Response(JSON.stringify(data)));
+      } catch {
+        /* ignore */
+      }
+    }
+    await persistBook(code, book, data);
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+async function loadBook(code: string, book: string): Promise<OfflineChapter | null> {
+  const idb = await readBookFromIdb(code, book);
+  if (idb) return idb;
+  const cached = await readBookFromCache(code, book);
+  if (cached) {
+    await persistBook(code, book, cached);
+    return cached;
+  }
+  return readBookFromNetwork(code, book);
+}
+
+/** Read one chapter from IndexedDB, Cache Storage, or the bundled pack files. */
 export async function getOfflineChapter(
   code: string,
   book: string,
   chapter: number,
 ): Promise<{ verse: number; heading: null; text: string }[] | null> {
-  const s = getStore();
-  if (!s) return null;
-  try {
-    const data = await get<OfflineChapter>(bookKey(code, book), s);
-    const verses = data?.chapters?.[String(chapter)];
-    if (!verses || verses.length === 0) return null;
-    return verses
-      .map((text, i) => ({ verse: i + 1, heading: null as null, text }))
-      .filter((v) => v.text);
-  } catch {
-    return null;
+  const data = await loadBook(code, book);
+  return versesFromBook(data, chapter);
+}
+
+/** Prefer the requested translation, then any downloaded pack (Tshiluba has no corpus). */
+export async function getOfflineChapterAny(
+  code: string,
+  book: string,
+  chapter: number,
+): Promise<{ translation: string; verses: { verse: number; heading: null; text: string }[] } | null> {
+  const preferred = await getOfflineChapter(code, book, chapter);
+  if (preferred && preferred.length > 0) {
+    return { translation: code, verses: preferred };
   }
+
+  const index = await getOfflineIndex();
+  const fallbacks = Object.keys(index).filter((c) => c !== code);
+  if (code === "LUA" && !fallbacks.includes("ESV")) fallbacks.unshift("ESV");
+
+  for (const other of fallbacks) {
+    const verses = await getOfflineChapter(other, book, chapter);
+    if (verses && verses.length > 0) {
+      return { translation: other, verses };
+    }
+  }
+  return null;
 }
 
 /* ------------------------------- downloading ----------------------------- */
@@ -117,6 +244,21 @@ export interface DownloadProgress {
   total: number;
   book: string;
   bytes: number;
+}
+
+async function cacheBookResponse(code: string, book: string, data: OfflineChapter): Promise<void> {
+  if (typeof caches === "undefined") return;
+  try {
+    const cache = await caches.open(BIBLE_PACK_CACHE);
+    await cache.put(
+      `/bible/${code}/${book}.json`,
+      new Response(JSON.stringify(data), {
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+  } catch {
+    /* ignore */
+  }
 }
 
 /**
@@ -143,6 +285,35 @@ export async function downloadPack(
   let bytes = 0;
   let done = 0;
 
+  const persistIndex = async () => {
+    await set(
+      INDEX_KEY,
+      {
+        ...(await getOfflineIndex()),
+        [code]: { books: Array.from(existing), downloadedAt: Date.now() },
+      },
+      s,
+    );
+  };
+
+  const fetchBook = async (book: string): Promise<boolean> => {
+    const res = await fetch(`/bible/${code}/${book}.json`, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = (await res.json()) as OfflineChapter;
+    if (!data?.chapters || Object.keys(data.chapters).length === 0) {
+      throw new Error("empty book");
+    }
+    await set(bookKey(code, book), data, s);
+    await cacheBookResponse(code, book, data);
+    existing.add(book);
+    downloaded += 1;
+    bytes += res.headers.get("content-length")
+      ? Number(res.headers.get("content-length"))
+      : JSON.stringify(data).length;
+    await persistIndex();
+    return true;
+  };
+
   for (const book of pack.files) {
     done += 1;
     if (existing.has(book)) {
@@ -151,40 +322,18 @@ export async function downloadPack(
       continue;
     }
     try {
-      const res = await fetch(`/bible/${code}/${book}.json`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as OfflineChapter;
-      await set(bookKey(code, book), data, s);
-      existing.add(book);
-      downloaded += 1;
-      bytes += res.headers.get("content-length")
-        ? Number(res.headers.get("content-length"))
-        : JSON.stringify(data).length;
-
-      // Persist progress after every book so an interrupted download resumes.
-      await set(
-        INDEX_KEY,
-        {
-          ...(await getOfflineIndex()),
-          [code]: { books: Array.from(existing), downloadedAt: Date.now() },
-        },
-        s,
-      );
+      await fetchBook(book);
     } catch {
-      failed.push(book);
+      try {
+        await fetchBook(book);
+      } catch {
+        failed.push(book);
+      }
     }
     onProgress?.({ done, total: pack.files.length, book, bytes });
   }
 
-  await set(
-    INDEX_KEY,
-    {
-      ...(await getOfflineIndex()),
-      [code]: { books: Array.from(existing), downloadedAt: Date.now() },
-    },
-    s,
-  );
-
+  await persistIndex();
   return { downloaded, skipped, failed };
 }
 
@@ -195,6 +344,14 @@ export async function removePack(code: string): Promise<void> {
   const state = await getPackState(code);
   if (state) {
     await Promise.all(state.books.map((b) => del(bookKey(code, b), s)));
+    if (typeof caches !== "undefined") {
+      try {
+        const cache = await caches.open(BIBLE_PACK_CACHE);
+        await Promise.all(state.books.map((b) => cache.delete(`/bible/${code}/${b}.json`)));
+      } catch {
+        /* ignore */
+      }
+    }
   }
   const index = await getOfflineIndex();
   delete index[code];

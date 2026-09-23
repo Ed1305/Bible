@@ -1,11 +1,13 @@
 // Lumina Bible service worker — offline-first caching.
-const VERSION = "lumina-v2";
+const VERSION = "lumina-v3";
 const SHELL_CACHE = `${VERSION}-shell`;
 const API_CACHE = `${VERSION}-api`;
 const ASSET_CACHE = `${VERSION}-assets`;
+const BIBLE_PACK_CACHE = "lumina-bible-packs";
 
 const SHELL_URLS = [
   "/",
+  "/read",
   "/listen",
   "/today",
   "/search",
@@ -14,6 +16,7 @@ const SHELL_URLS = [
   "/settings",
   "/manifest.webmanifest",
   "/offline.html",
+  "/bible/manifest.json",
 ];
 
 self.addEventListener("install", (event) => {
@@ -30,7 +33,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => !k.startsWith(VERSION))
+          .filter((k) => !k.startsWith(VERSION) && k !== BIBLE_PACK_CACHE)
           .map((k) => caches.delete(k)),
       ),
     ),
@@ -42,6 +45,31 @@ function isApi(url) {
   return url.pathname.startsWith("/api/");
 }
 
+function isReadRoute(url) {
+  return url.pathname === "/read" || url.pathname.startsWith("/read/");
+}
+
+function isBiblePack(url) {
+  return url.pathname.startsWith("/bible/");
+}
+
+async function matchShell(request, url) {
+  const cachedExact = await caches.match(request);
+  if (cachedExact) return cachedExact;
+  if (isReadRoute(url)) {
+    return (
+      (await caches.match("/read")) ||
+      (await caches.match("/")) ||
+      (await caches.match("/offline.html"))
+    );
+  }
+  return (
+    (await caches.match(url.pathname)) ||
+    (await caches.match("/")) ||
+    (await caches.match("/offline.html"))
+  );
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
@@ -51,24 +79,47 @@ self.addEventListener("fetch", (event) => {
   // Never cache health checks.
   if (url.pathname === "/api/health") return;
 
-  // Navigations: network-first, fall back to cache then offline page.
+  // Navigations: network-first, fall back to the matching app shell.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
         .then((res) => {
           const copy = res.clone();
-          caches.open(SHELL_CACHE).then((c) => c.put(request, copy));
+          caches.open(SHELL_CACHE).then((c) => {
+            c.put(request, copy);
+            if (isReadRoute(url)) c.put("/read", res.clone());
+          });
           return res;
         })
         .catch(async () => {
-          const cached = await caches.match(request);
           return (
-            cached ||
-            (await caches.match("/")) ||
-            (await caches.match("/offline.html")) ||
+            (await matchShell(request, url)) ||
             new Response("Offline", { status: 503 })
           );
         }),
+    );
+    return;
+  }
+
+  // Bible JSON packs: cache-first so downloaded translations work offline.
+  if (isBiblePack(url)) {
+    event.respondWith(
+      (async () => {
+        const packHit = await caches.open(BIBLE_PACK_CACHE).then((c) => c.match(request));
+        if (packHit) return packHit;
+        const assetHit = await caches.open(ASSET_CACHE).then((c) => c.match(request));
+        if (assetHit) return assetHit;
+        try {
+          const res = await fetch(request);
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(BIBLE_PACK_CACHE).then((c) => c.put(request, copy));
+          }
+          return res;
+        } catch {
+          return packHit || assetHit || new Response("{}", { status: 504 });
+        }
+      })(),
     );
     return;
   }
@@ -85,6 +136,16 @@ self.addEventListener("fetch", (event) => {
           })
           .catch(() => cached);
         return cached || network;
+      }),
+    );
+    return;
+  }
+
+  // Reader client fetches: when offline, serve the cached reader shell.
+  if (isReadRoute(url)) {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        return (await matchShell(request, url)) || new Response("", { status: 504 });
       }),
     );
     return;

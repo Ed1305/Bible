@@ -32,6 +32,7 @@ function ListenInner() {
   const [rate, setRate] = useState(0.95);
   const [supported, setSupported] = useState(true);
   const [audioError, setAudioError] = useState("");
+  const [voiceLabel, setVoiceLabel] = useState("");
 
   const versesRef = useRef<VerseData[]>([]);
   const rateRef = useRef(rate);
@@ -83,10 +84,21 @@ function ListenInner() {
   const startKeepAlive = useCallback(() => {
     clearKeepAlive();
     keepAliveRef.current = window.setInterval(() => {
-      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
+      const synth = window.speechSynthesis;
+      if (!synth.speaking) return;
+      if (synth.paused) {
+        synth.resume();
+        return;
       }
-    }, 8000);
+      // Chrome stops TTS around 15s; pause/resume keeps the audio pipeline alive
+      // without the silent "resume-only" state.
+      try {
+        synth.pause();
+        synth.resume();
+      } catch {
+        /* ignore */
+      }
+    }, 12000);
   }, [clearKeepAlive]);
 
   const stop = useCallback(() => {
@@ -122,14 +134,40 @@ function ListenInner() {
     const voices = window.speechSynthesis.getVoices();
     const want = tr.ttsLang.toLowerCase();
     const base = want.split("-")[0];
+    const local = voices.filter((v) => v.localService);
+    const pool = local.length ? local : voices;
     return (
+      pool.find((v) => v.lang.toLowerCase() === want) ||
+      pool.find((v) => v.lang.toLowerCase().startsWith(base + "-") || v.lang.toLowerCase() === base) ||
       voices.find((v) => v.lang.toLowerCase() === want) ||
       voices.find((v) => v.lang.toLowerCase().startsWith(base)) ||
+      pool.find((v) => v.lang.toLowerCase().startsWith("en")) ||
       voices.find((v) => v.lang.toLowerCase().startsWith("en")) ||
+      pool[0] ||
       voices[0] ||
       null
     );
   }, [tr.ttsLang]);
+
+  const unlockAudio = useCallback(() => {
+    try {
+      const AC =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.04);
+      void ctx.resume();
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const speakFrom = useCallback(
     (index: number, token: number) => {
@@ -148,10 +186,27 @@ function ListenInner() {
       }
       const u = new SpeechSynthesisUtterance(text);
       utteranceRef.current = u;
-      u.lang = tr.ttsLang;
+      u.volume = 1;
+      u.pitch = 1;
       u.rate = rateRef.current;
       const voice = pickVoice();
-      if (voice) u.voice = voice;
+      // Matching lang to the actual voice avoids the common "playing but silent"
+      // bug when the requested language (Lingala, Tshiluba, Swahili) has no TTS engine.
+      if (voice) {
+        u.voice = voice;
+        u.lang = voice.lang;
+        const requested = tr.ttsLang.split("-")[0].toLowerCase();
+        const used = voice.lang.split("-")[0].toLowerCase();
+        setVoiceLabel(
+          used === requested
+            ? voice.name
+            : `${voice.name} · this device has no ${tr.language} voice`,
+        );
+      } else {
+        const base = tr.ttsLang.split("-")[0];
+        u.lang = base === "fr" ? "fr-FR" : "en-US";
+        setVoiceLabel("System voice");
+      }
       u.onstart = () => {
         if (token !== tokenRef.current) return;
         setCurrent(index);
@@ -175,7 +230,7 @@ function ListenInner() {
         setPlaying(false);
       }
     },
-    [clearKeepAlive, pickVoice, tr.ttsLang],
+    [clearKeepAlive, pickVoice, tr.language, tr.ttsLang],
   );
 
   const play = useCallback(
@@ -187,16 +242,29 @@ function ListenInner() {
       if (!versesRef.current.length) return;
       const token = tokenRef.current + 1;
       tokenRef.current = token;
-      window.speechSynthesis.cancel();
+      unlockAudio();
       const start = from ?? (current >= 0 ? current : 0);
       setPlaying(true);
+      setAudioError("");
       startKeepAlive();
-      window.setTimeout(() => {
-        if (token !== tokenRef.current) return;
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      // iOS requires speak() inside the user-gesture turn. Chrome needs a brief
+      // gap after cancel() or the next utterance starts silent.
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        /* ignore */
+      }
+      if (isiOS) {
         speakFrom(start, token);
-      }, 120);
+      } else {
+        window.setTimeout(() => {
+          if (token !== tokenRef.current) return;
+          speakFrom(start, token);
+        }, 60);
+      }
     },
-    [supported, speakFrom, current, startKeepAlive],
+    [supported, speakFrom, current, startKeepAlive, unlockAudio],
   );
 
   const pause = useCallback(() => {
@@ -287,6 +355,7 @@ function ListenInner() {
             </p>
             <p className="text-[13px] text-muted">
               {tr.name} · {verses.length} {t.chapter.toLowerCase()}s
+              {voiceLabel ? ` · ${voiceLabel}` : ""}
             </p>
           </div>
         </div>
@@ -369,7 +438,7 @@ function ListenInner() {
           <p className="py-6 text-center text-sm text-muted">
             Not available in {tr.abbr}.{" "}
             <Link href={`/listen?translation=ESV&book=${book}&chapter=${chapter}`} className="text-accent">
-              Try ESV
+              Try English
             </Link>
           </p>
         ) : (
