@@ -500,6 +500,7 @@ export default function ReaderView() {
             translation={shownTranslation}
             initialBook={book}
             initialChapter={chapter}
+            initialStep="book"
             onDone={() => setShowChapters(false)}
           />
         </Sheet>

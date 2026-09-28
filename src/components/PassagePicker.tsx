@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { BOOKS, BOOKS_BY_SLUG, bookName, type Testament } from "@/lib/bible/books";
 import { ReadLink } from "@/components/ReadLink";
@@ -26,9 +26,16 @@ export function PassagePicker({
   onDone?: () => void;
 }) {
   const { lang, t, fetchChapter } = useStore();
-  const [step, setStep] = useState<Step>(initialStep);
+  // One-chapter books (Obadiah, Jude, …) skip straight to verses.
+  const singleChapter = BOOKS_BY_SLUG[initialBook]?.chapters === 1;
+  const [step, setStep] = useState<Step>(
+    initialStep === "chapter" && singleChapter ? "verse" : initialStep,
+  );
   const [book, setBook] = useState(initialBook);
-  const [chapter, setChapter] = useState<number | null>(initialChapter ?? null);
+  const [chapter, setChapter] = useState<number | null>(
+    initialChapter ?? (singleChapter ? 1 : null),
+  );
+  const rootRef = useRef<HTMLDivElement>(null);
   const [testament, setTestament] = useState<Testament>(
     BOOKS_BY_SLUG[initialBook]?.testament ?? "OT",
   );
@@ -49,6 +56,25 @@ export function PassagePicker({
     };
   }, [step, translation, book, chapter, fetchChapter]);
 
+  // Each step starts at the top of the (scrollable) sheet.
+  useEffect(() => {
+    rootRef.current?.closest(".overflow-y-auto")?.scrollTo({ top: 0 });
+  }, [step, book]);
+
+  const chooseBook = (slug: string) => {
+    const one = BOOKS_BY_SLUG[slug]?.chapters === 1;
+    setBook(slug);
+    setVerseCount(null);
+    setChapter(one ? 1 : null);
+    setStep(one ? "verse" : "chapter");
+  };
+
+  const chooseChapter = (c: number) => {
+    if (c !== chapter) setVerseCount(null);
+    setChapter(c);
+    setStep("verse");
+  };
+
   const tab = (s: Step, label: string, enabled: boolean) => (
     <button
       type="button"
@@ -67,7 +93,7 @@ export function PassagePicker({
     "grid h-11 place-items-center rounded-xl text-[15px] font-semibold tabular-nums transition-colors md:h-12";
 
   return (
-    <div>
+    <div ref={rootRef}>
       <p className="mb-3 text-center text-lg font-semibold text-ink">
         {bookName(book, lang)}
         {chapter !== null && step !== "book" && <span className="text-accent"> {chapter}</span>}
@@ -79,6 +105,7 @@ export function PassagePicker({
         {tab("verse", "Verse", chapter !== null)}
       </div>
 
+      <div key={`${step}-${book}-${chapter}`} className="animate-step">
       {step === "book" && (
         <>
           <Segmented
@@ -94,12 +121,7 @@ export function PassagePicker({
               <li key={b.slug}>
                 <button
                   type="button"
-                  onClick={() => {
-                    setBook(b.slug);
-                    setChapter(null);
-                    setVerseCount(null);
-                    setStep("chapter");
-                  }}
+                  onClick={() => chooseBook(b.slug)}
                   className={
                     "w-full truncate rounded-xl px-3 py-2.5 text-left text-sm font-medium " +
                     (b.slug === book ? "bg-accent text-white" : "bg-surface-2 text-ink hover:bg-line")
@@ -119,11 +141,7 @@ export function PassagePicker({
             <button
               key={c}
               type="button"
-              onClick={() => {
-                if (c !== chapter) setVerseCount(null);
-                setChapter(c);
-                setStep("verse");
-              }}
+              onClick={() => chooseChapter(c)}
               className={
                 cell + " " + (c === chapter ? "bg-accent text-white" : "bg-surface-2 text-ink hover:bg-line")
               }
@@ -146,9 +164,18 @@ export function PassagePicker({
               ))}
             </div>
           ) : verseCount === 0 ? (
-            <p className="py-6 text-center text-sm text-muted">
-              Verses aren&rsquo;t available offline for this chapter yet.
-            </p>
+            <div className="py-6 text-center text-sm text-muted">
+              <p>Verses aren&rsquo;t available offline for this chapter yet.</p>
+              <ReadLink
+                translation={translation}
+                book={book}
+                chapter={chapter}
+                onClick={onDone}
+                className="mt-2 inline-block font-semibold text-accent"
+              >
+                {bookName(book, lang)} {chapter} →
+              </ReadLink>
+            </div>
           ) : (
             <div className="grid grid-cols-5 gap-2 min-[400px]:grid-cols-6 sm:grid-cols-8 md:grid-cols-10">
               {Array.from({ length: verseCount }, (_, i) => i + 1).map((v) => (
@@ -168,6 +195,7 @@ export function PassagePicker({
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
