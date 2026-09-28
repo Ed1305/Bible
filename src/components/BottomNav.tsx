@@ -32,7 +32,7 @@ function useLabels() {
 
 const items: Item[] = [
   { href: "/listen", label: "listen", icon: HeadphonesIcon, match: (p) => p.startsWith("/listen") },
-  { href: "/", label: "bible", icon: BookIcon, match: (p) => p === "/" || p.startsWith("/read") || p.startsWith("/search") || p.startsWith("/settings") },
+  { href: "/", label: "bible", icon: BookIcon, match: (p) => p === "/" || p.startsWith("/read") || p.startsWith("/search") || p.startsWith("/settings") || p.startsWith("/progress") },
   { href: "/today", label: "today", icon: SunIcon, match: (p) => p.startsWith("/today") },
   { href: "/prayers", label: "prayers", icon: HandsIcon, match: (p) => p.startsWith("/prayers") },
   { href: "/journal", label: "journal", icon: PenIcon, match: (p) => p.startsWith("/journal") },

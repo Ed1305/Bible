@@ -66,7 +66,7 @@ export default function PlanDetail() {
     <div>
       <TopBar backHref="/today" title={t.readingPlans} />
       <div className="px-4 pb-8">
-        <div className="rounded-[20px] bg-gradient-to-br from-accent to-[#41618f] p-5 text-white shadow-soft">
+        <div className="rounded-[20px] bg-gradient-to-br from-navy-2 to-navy p-5 text-white shadow-soft">
           <h1 className="font-serif text-2xl font-semibold">{plan.title}</h1>
           <p className="mt-1 text-[14px] text-white/85">{plan.description ?? plan.subtitle}</p>
           <div className="mt-4 flex items-center gap-2">

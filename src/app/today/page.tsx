@@ -28,7 +28,7 @@ const VOTD = [
 ];
 
 const accentClasses: Record<string, string> = {
-  blue: "from-accent to-[#41618f]",
+  blue: "from-accent to-[#b3121a]",
   green: "from-verdant to-[#559277]",
   gold: "from-gold to-[#c39a4d]",
 };
@@ -68,7 +68,7 @@ export default function TodayPage() {
         translation="ESV"
         book={votd.book}
         chapter={votd.chapter}
-        className="mt-4 block overflow-hidden rounded-[20px] bg-gradient-to-br from-[#2b3a55] to-[#41618f] p-5 text-white shadow-soft"
+        className="mt-4 block overflow-hidden rounded-[20px] bg-gradient-to-br from-navy-2 to-navy p-5 text-white shadow-soft"
       >
         <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
           {t.verseOfDay}

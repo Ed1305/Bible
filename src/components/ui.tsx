@@ -60,7 +60,7 @@ export function Segmented<T extends string>({
 
 export function Avatar({ label }: { label: string }) {
   return (
-    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-accent to-[#3f5f92] text-sm font-semibold text-white">
+    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-accent to-navy text-sm font-semibold text-white">
       {label}
     </div>
   );

@@ -17,6 +17,7 @@ import {
   ChevronRight,
   SettingsIcon,
   GlobeIcon,
+  ProgressIcon,
 } from "@/components/icons";
 
 type AvailMap = Record<string, Record<string, number[]>>;
@@ -108,6 +109,13 @@ export default function BibleHome() {
             <SearchIcon className="h-5 w-5" />
           </Link>
           <Link
+            href="/progress"
+            className="grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface-2"
+            aria-label="Reading progress"
+          >
+            <ProgressIcon className="h-5 w-5" />
+          </Link>
+          <Link
             href="/today"
             className="relative grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface-2"
             aria-label={t.today}
@@ -131,7 +139,7 @@ export default function BibleHome() {
           translation={user.lastRead.translation}
           book={user.lastRead.book}
           chapter={user.lastRead.chapter}
-          className="mt-4 flex items-center justify-between rounded-[18px] bg-gradient-to-r from-accent to-[#41618f] p-4 text-white shadow-soft"
+          className="mt-4 flex items-center justify-between rounded-[18px] bg-gradient-to-r from-navy-2 to-navy p-4 text-white shadow-soft"
         >
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">

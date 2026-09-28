@@ -58,6 +58,14 @@ interface UserData {
   prayers: Prayer[];
   journal: JournalEntry[];
   lastRead: { translation: string; book: string; chapter: number } | null;
+  chaptersRead: string[]; // `${book}:${chapter}`, translation-independent
+  readLog: Record<string, string[]>; // local YYYY-MM-DD -> chapters opened that day, in order
+}
+
+export function dayKey(d: Date = new Date()): string {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
 }
 
 const DEFAULT_USER: UserData = {
@@ -68,6 +76,8 @@ const DEFAULT_USER: UserData = {
   prayers: [],
   journal: [],
   lastRead: null,
+  chaptersRead: [],
+  readLog: {},
 };
 
 interface StoreValue {
@@ -259,10 +269,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setLastRead = useCallback(
     (book: string, chapter: number) => {
       const testament = BOOKS_BY_SLUG[book]?.testament ?? "OT";
-      setUser((p) => ({
-        ...p,
-        lastRead: { translation: settings.translation, book, chapter },
-      }));
+      const key = `${book}:${chapter}`;
+      const today = dayKey();
+      setUser((p) => {
+        const todays = p.readLog[today] ?? [];
+        return {
+          ...p,
+          lastRead: { translation: settings.translation, book, chapter },
+          chaptersRead: p.chaptersRead.includes(key) ? p.chaptersRead : [...p.chaptersRead, key],
+          readLog: {
+            ...p.readLog,
+            [today]: [...todays.filter((k) => k !== key), key],
+          },
+        };
+      });
       setSettings((p) => ({ ...p, lastTestament: testament }));
     },
     [settings.translation],

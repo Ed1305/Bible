@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function StatusBar() {
   const [time, setTime] = useState("");
+  const onNavy = usePathname() === "/progress";
 
   useEffect(() => {
     const update = () =>
@@ -20,7 +22,12 @@ export default function StatusBar() {
   }, []);
 
   return (
-    <div className="safe-top flex items-center justify-between px-5 pt-2 text-ink sm:hidden">
+    <div
+      className={
+        "safe-top flex items-center justify-between px-5 pt-2 sm:hidden " +
+        (onNavy ? "text-white" : "text-ink")
+      }
+    >
       <span className="text-[13px] font-semibold tabular-nums">{time || "10:20"}</span>
       <div className="flex items-center gap-1.5">
         {/* signal */}
