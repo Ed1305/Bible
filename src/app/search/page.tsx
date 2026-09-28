@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { bookName } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
 import { ReadLink } from "@/components/ReadLink";
+import { searchOffline } from "@/lib/offline";
 import { Chip } from "@/components/ui";
 import { BackIcon, SearchIcon, CloseIcon } from "@/components/icons";
 
@@ -25,6 +26,7 @@ export default function SearchPage() {
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [source, setSource] = useState<"device" | "server" | "none">("server");
   const [history, setHistory] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,14 +62,31 @@ export default function SearchPage() {
     }
     setLoading(true);
     setTouched(true);
-    const id = setTimeout(() => {
-      fetch(`/api/search?q=${encodeURIComponent(term)}&translation=${settings.translation}`)
-        .then((r) => r.json())
-        .then((d) => setResults(d.results ?? []))
-        .catch(() => setResults([]))
-        .finally(() => setLoading(false));
+    let active = true;
+    const code = settings.translation;
+    const id = setTimeout(async () => {
+      // Downloaded translation: search on-device, no network needed.
+      let hits = await searchOffline(code, term).catch(() => null);
+      let source: "device" | "server" | "none" = hits ? "device" : "server";
+      if (!hits) {
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(term)}&translation=${code}`);
+          if (!res.ok) throw new Error(String(res.status));
+          hits = ((await res.json()).results ?? []) as Result[];
+        } catch {
+          hits = [];
+          source = "none";
+        }
+      }
+      if (!active) return;
+      setResults(hits);
+      setSource(source);
+      setLoading(false);
     }, 250);
-    return () => clearTimeout(id);
+    return () => {
+      active = false;
+      clearTimeout(id);
+    };
   }, [q, settings.translation]);
 
   const countLabel = useMemo(() => {
@@ -198,7 +217,11 @@ export default function SearchPage() {
         {!loading && touched && term.length >= 2 && results.length === 0 && (
           <div className="mt-16 text-center text-muted">
             <SearchIcon className="mx-auto h-10 w-10 opacity-40" />
-            <p className="mt-3 text-sm">{t.noResults}</p>
+            <p className="mt-3 text-sm">
+              {source === "none"
+                ? "You're offline. Download this Bible in Settings to search it without internet."
+                : t.noResults}
+            </p>
           </div>
         )}
 

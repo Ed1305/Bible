@@ -237,6 +237,78 @@ export async function getOfflineChapterAny(
   return null;
 }
 
+/* -------------------------------- search -------------------------------- */
+
+export interface SearchHit {
+  book: string;
+  chapter: number;
+  verse: number;
+  text: string;
+}
+
+function normalize(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// Parsed books stay in memory so typing in search doesn't re-read IndexedDB.
+const searchBookCache = new Map<string, OfflineChapter>();
+
+/**
+ * Search a downloaded translation entirely on-device (same matching as the
+ * server: case- and accent-insensitive, canonical order). Returns null when
+ * the translation isn't downloaded.
+ */
+export async function searchOffline(
+  code: string,
+  query: string,
+  limit = 60,
+): Promise<SearchHit[] | null> {
+  const [manifest, state] = await Promise.all([loadManifest(), getPackState(code)]);
+  if (!state || state.books.length === 0) return null;
+  const q = normalize(query.trim());
+  if (q.length < 2) return [];
+
+  const order = manifest?.packs.find((p) => p.code === code)?.files ?? state.books;
+  const results: SearchHit[] = [];
+  for (const book of order) {
+    if (!state.books.includes(book)) continue;
+    const cacheKey = `${code}:${book}`;
+    let data = searchBookCache.get(cacheKey) ?? null;
+    if (!data) {
+      data = (await readBookFromIdb(code, book)) ?? (await readBookFromCache(code, book));
+      if (!data) continue;
+      searchBookCache.set(cacheKey, data);
+    }
+    for (const [chapter, verses] of Object.entries(data.chapters)) {
+      for (let i = 0; i < verses.length; i += 1) {
+        const text = verses[i];
+        if (text && normalize(text).includes(q)) {
+          results.push({ book, chapter: Number(chapter), verse: i + 1, text });
+          if (results.length >= limit) return results;
+        }
+      }
+    }
+  }
+  return results;
+}
+
+/* --------------------------------- app shell ------------------------------ */
+
+/**
+ * Ask the service worker to (re)cache every app screen plus the scripts and
+ * styles they need, so the whole app — not just the Bible text — opens offline.
+ */
+export async function warmAppShell(): Promise<void> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+  if (!navigator.onLine) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    reg.active?.postMessage({ type: "warm-app" });
+  } catch {
+    /* ignore */
+  }
+}
+
 /* ------------------------------- downloading ----------------------------- */
 
 export interface DownloadProgress {
@@ -334,6 +406,7 @@ export async function downloadPack(
   }
 
   await persistIndex();
+  void warmAppShell();
   return { downloaded, skipped, failed };
 }
 
@@ -352,6 +425,9 @@ export async function removePack(code: string): Promise<void> {
         /* ignore */
       }
     }
+  }
+  for (const key of searchBookCache.keys()) {
+    if (key.startsWith(`${code}:`)) searchBookCache.delete(key);
   }
   const index = await getOfflineIndex();
   delete index[code];
