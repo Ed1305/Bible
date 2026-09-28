@@ -7,6 +7,7 @@ import { BOOKS, bookName, type BookMeta } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
 import { getOfflineAvailability } from "@/lib/offline";
 import { ReadLink } from "@/components/ReadLink";
+import { PassagePicker } from "@/components/PassagePicker";
 import { Avatar, Segmented, Sheet } from "@/components/ui";
 import {
   SearchIcon,
@@ -223,25 +224,11 @@ export default function BibleHome() {
 
       {picking && (
         <Sheet onClose={() => setPicking(null)}>
-          <p className="mb-1 text-center font-serif text-lg font-semibold">
-            {bookName(picking.slug, lang)}
-          </p>
-          <p className="mb-4 text-center text-[12px] font-medium uppercase tracking-wider text-muted">
-            {t.selectChapter}
-          </p>
-          <div className="grid grid-cols-6 gap-2">
-            {Array.from({ length: picking.chapters }, (_, i) => i + 1).map((c) => (
-              <ReadLink
-                key={c}
-                translation={settings.translation}
-                book={picking.slug}
-                chapter={c}
-                className="grid h-11 place-items-center rounded-xl bg-surface-2 text-sm font-medium text-ink hover:bg-line"
-              >
-                {c}
-              </ReadLink>
-            ))}
-          </div>
+          <PassagePicker
+            translation={settings.translation}
+            initialBook={picking.slug}
+            onDone={() => setPicking(null)}
+          />
         </Sheet>
       )}
     </div>

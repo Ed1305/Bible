@@ -9,6 +9,7 @@ export function ReadLink({
   translation,
   book,
   chapter,
+  verse,
   className,
   children,
   onClick,
@@ -16,12 +17,13 @@ export function ReadLink({
   translation: string;
   book: string;
   chapter: number;
+  verse?: number | null;
   className?: string;
   children: ReactNode;
   onClick?: () => void;
 }) {
   const { online } = useStore();
-  const href = readHref(translation, book, chapter);
+  const href = readHref(translation, book, chapter, verse);
   if (!online) {
     return (
       <a href={href} className={className} onClick={onClick}>

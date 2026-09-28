@@ -27,6 +27,7 @@ import {
   CommentIcon,
 } from "@/components/icons";
 import { Sheet } from "@/components/ui";
+import { PassagePicker } from "@/components/PassagePicker";
 
 export default function ReaderView() {
   const pathname = usePathname();
@@ -35,6 +36,7 @@ export default function ReaderView() {
   const translation = ref.translation;
   const book = ref.book;
   const chapter = ref.chapter;
+  const targetVerse = ref.verse;
 
   const {
     fetchChapter,
@@ -55,7 +57,15 @@ export default function ReaderView() {
   const meta = BOOKS_BY_SLUG[book];
   const [data, setData] = useState<ChapterData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<number | null>(null);
+  // A tap only overrides the ?verse= deep link it was made under; a new deep link
+  // (or chapter change, which resets it) selects the linked verse again.
+  const [picked, setPicked] = useState<{ link: number | null; verse: number | null } | null>(null);
+  const selected = picked && picked.link === targetVerse ? picked.verse : targetVerse;
+  const setSelected = useCallback(
+    (verse: number | null | undefined) =>
+      setPicked(verse === undefined ? null : { link: targetVerse, verse }),
+    [targetVerse],
+  );
   const [showSize, setShowSize] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
@@ -73,7 +83,7 @@ export default function ReaderView() {
       setLoading(false);
     });
     setLastRead(book, chapter);
-    setSelected(null);
+    setPicked(null);
     setShowChapters(false);
     setDownloaded(!!getCachedChapter(translation, book, chapter));
     void isPackDownloaded(translation).then((yes) => {
@@ -83,6 +93,19 @@ export default function ReaderView() {
       active = false;
     };
   }, [translation, book, chapter, fetchChapter, setLastRead, getCachedChapter]);
+
+  // Deep link (?verse=N): select that verse and bring it into view once loaded.
+  useEffect(() => {
+    if (!targetVerse || !data || data.book !== book || data.chapter !== chapter) return;
+    if (!data.verses.some((v) => v.verse === targetVerse)) return;
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`v-${targetVerse}`);
+      if (!el) return;
+      const header = document.querySelector<HTMLElement>("[data-reader-header]");
+      const offset = (header?.offsetHeight ?? 0) + 16;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
+    });
+  }, [targetVerse, data, book, chapter]);
 
   const showToast = useCallback((m: string) => {
     setToast(m);
@@ -174,7 +197,7 @@ export default function ReaderView() {
         />
       )}
 
-      <div className="sticky top-0 z-30 bg-surface">
+      <div data-reader-header className="sticky top-0 z-30 bg-surface">
         <div className="flex items-center justify-between px-4 pb-2 pt-3 text-ink">
           <IconLink href="/settings" label={t.settings}>
             <MenuIcon className="h-5 w-5" />
@@ -344,6 +367,7 @@ export default function ReaderView() {
                     return (
                       <span
                         key={v.verse}
+                        id={`v-${v.verse}`}
                         onClick={() => setSelected(active ? null : v.verse)}
                         className={"v " + (active ? "is-active " : "") + (hl ? "is-highlighted" : "")}
                       >
@@ -470,27 +494,12 @@ export default function ReaderView() {
 
       {showChapters && (
         <Sheet onClose={() => setShowChapters(false)}>
-          <p className="mb-3 text-center font-serif text-lg font-semibold">
-            {bookName(book, lang)}
-          </p>
-          <div className="grid grid-cols-6 gap-2">
-            {Array.from({ length: totalChapters }, (_, i) => i + 1).map((c) => (
-              <ReadLink
-                key={c}
-                translation={shownTranslation}
-                book={book}
-                chapter={c}
-                className={
-                  "grid h-11 place-items-center rounded-xl text-sm font-medium " +
-                  (c === chapter
-                    ? "bg-accent text-white"
-                    : "bg-surface-2 text-ink hover:bg-line")
-                }
-              >
-                {c}
-              </ReadLink>
-            ))}
-          </div>
+          <PassagePicker
+            translation={shownTranslation}
+            initialBook={book}
+            initialChapter={chapter}
+            onDone={() => setShowChapters(false)}
+          />
         </Sheet>
       )}
 

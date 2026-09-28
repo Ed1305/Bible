@@ -209,6 +209,7 @@ export default function SearchPage() {
                   translation={settings.translation}
                   book={r.book}
                   chapter={r.chapter}
+                  verse={r.verse}
                   onClick={() => saveHistory(term)}
                   className="block"
                 >
