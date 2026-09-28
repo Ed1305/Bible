@@ -167,7 +167,7 @@ export default function BibleHome() {
       </div>
 
       {/* Book list */}
-      <ul className="mt-3 space-y-2 pb-6">
+      <ul className="mt-3 grid gap-2 pb-6 md:grid-cols-2 lg:grid-cols-3">
         {books.map((b) => {
           const c = counts[b.slug];
           const has = (availForTr[b.slug]?.length ?? 0) > 0;

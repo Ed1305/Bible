@@ -9,8 +9,8 @@ import { Segmented } from "@/components/ui";
 type Step = "book" | "chapter" | "verse";
 
 /**
- * Book → Chapter → Verse picker. Choosing a verse opens the reader scrolled
- * to that verse; "Open chapter" skips the verse step.
+ * Book → Chapter → Verse picker. Choosing a verse opens the reader at that
+ * verse, underlined in red.
  */
 export function PassagePicker({
   translation,
@@ -64,7 +64,7 @@ export function PassagePicker({
   );
 
   const cell =
-    "grid h-11 place-items-center rounded-xl text-sm font-medium transition-colors";
+    "grid h-11 place-items-center rounded-xl text-[15px] font-semibold tabular-nums transition-colors md:h-12";
 
   return (
     <div>
@@ -89,7 +89,7 @@ export function PassagePicker({
               { value: "NT", label: t.newTestament },
             ]}
           />
-          <ul className="mt-3 grid grid-cols-2 gap-2">
+          <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             {BOOKS.filter((b) => b.testament === testament).map((b) => (
               <li key={b.slug}>
                 <button
@@ -114,7 +114,7 @@ export function PassagePicker({
       )}
 
       {step === "chapter" && meta && (
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-5 gap-2 min-[400px]:grid-cols-6 sm:grid-cols-8 md:grid-cols-10">
           {Array.from({ length: meta.chapters }, (_, i) => i + 1).map((c) => (
             <button
               key={c}
@@ -136,17 +136,11 @@ export function PassagePicker({
 
       {step === "verse" && chapter !== null && (
         <>
-          <ReadLink
-            translation={translation}
-            book={book}
-            chapter={chapter}
-            onClick={onDone}
-            className="mb-3 block w-full rounded-xl bg-navy py-2.5 text-center text-sm font-semibold text-white"
-          >
-            Open {bookName(book, lang)} {chapter}
-          </ReadLink>
+          <p className="mb-3 text-center text-[13px] text-muted">
+            Tap a verse to open it
+          </p>
           {verseCount === null ? (
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-5 gap-2 min-[400px]:grid-cols-6 sm:grid-cols-8 md:grid-cols-10">
               {Array.from({ length: 18 }).map((_, i) => (
                 <div key={i} className="h-11 animate-pulse rounded-xl bg-surface-2" />
               ))}
@@ -156,7 +150,7 @@ export function PassagePicker({
               Verses aren&rsquo;t available offline for this chapter yet.
             </p>
           ) : (
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-5 gap-2 min-[400px]:grid-cols-6 sm:grid-cols-8 md:grid-cols-10">
               {Array.from({ length: verseCount }, (_, i) => i + 1).map((v) => (
                 <ReadLink
                   key={v}

@@ -65,7 +65,7 @@ export default function ProgressPage() {
   }, [user.readLog]);
 
   return (
-    <div className="min-h-full px-6 pb-8 pt-3 text-white">
+    <div className="mx-auto min-h-full w-full max-w-xl px-6 pb-8 pt-3 text-white md:pt-8">
       <Link
         href="/"
         className="-ml-2 grid h-9 w-9 place-items-center rounded-full text-white/80 hover:bg-white/10"

@@ -50,7 +50,7 @@ export default function TodayPage() {
   const tr = getTranslation(settings.translation);
 
   return (
-    <div className="px-4 pt-2">
+    <div className="px-4 pt-2 md:px-6">
       <header className="flex items-center gap-3 pt-1">
         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gold/20 text-gold">
           <SunIcon className="h-6 w-6" />
@@ -93,7 +93,7 @@ export default function TodayPage() {
           ))}
         </div>
       ) : (
-        <ul className="space-y-3 pb-6">
+        <ul className="grid gap-3 pb-6 md:grid-cols-2">
           {plans.map((p) => {
             const done = completedDays(p.slug).length;
             const pct = Math.round((done / p.durationDays) * 100);

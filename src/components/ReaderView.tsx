@@ -198,7 +198,7 @@ export default function ReaderView() {
       )}
 
       <div data-reader-header className="sticky top-0 z-30 bg-surface">
-        <div className="flex items-center justify-between px-4 pb-2 pt-3 text-ink">
+        <div className="read-col flex items-center justify-between px-4 pb-2 pt-3 text-ink md:px-6">
           <IconLink href="/settings" label={t.settings}>
             <MenuIcon className="h-5 w-5" />
           </IconLink>
@@ -229,7 +229,7 @@ export default function ReaderView() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-6 pb-3 pt-1">
+        <div className="read-col flex items-center justify-between px-6 pb-3 pt-1 md:px-8">
           <button
             onClick={() => setShowChapters(true)}
             className="flex items-baseline gap-2 text-left"
@@ -252,8 +252,9 @@ export default function ReaderView() {
           </button>
         </div>
 
-        <div className="flex items-center justify-between bg-navy px-6 py-3 text-white">
-          <span className="text-[15px] font-semibold">
+        <div className="bg-navy text-white">
+        <div className="read-col flex items-center justify-between px-6 py-3 md:px-8">
+          <span className="text-[15px] font-semibold md:text-[16px]">
             {bookName(book, lang)} {chapter}
             {selected !== null && <span className="font-normal text-white/60">:{selected}</span>}
           </span>
@@ -268,9 +269,10 @@ export default function ReaderView() {
             {targetBookmarked ? "Bookmarked" : t.bookmark}
           </button>
         </div>
+        </div>
 
         {showSize && (
-          <div className="animate-pop mx-4 mt-3 flex items-center gap-3 rounded-2xl border border-line bg-surface p-3 shadow-float">
+          <div className="animate-pop mx-4 mt-3 flex items-center gap-3 rounded-2xl md:mx-auto md:max-w-xl border border-line bg-surface p-3 shadow-float">
             <span className="text-sm text-muted">{t.textSize}</span>
             <button
               onClick={() => setTextScale(scale - 0.1)}
@@ -302,7 +304,7 @@ export default function ReaderView() {
           translation={shownTranslation}
           book={book}
           chapter={prevChapter}
-          className={sideBtn + " left-[max(0.5rem,calc(50vw-18rem+0.5rem))]"}
+          className={sideBtn + " left-[max(0.5rem,calc(50vw_-_var(--shell)/2_+_0.5rem))]"}
         >
           <BackIcon className="h-6 w-6" />
         </ReadLink>
@@ -312,13 +314,13 @@ export default function ReaderView() {
           translation={shownTranslation}
           book={book}
           chapter={nextChapter}
-          className={sideBtn + " right-[max(0.5rem,calc(50vw-18rem+0.5rem))]"}
+          className={sideBtn + " right-[max(0.5rem,calc(50vw_-_var(--shell)/2_+_0.5rem))]"}
         >
           <ChevronRight className="h-6 w-6" />
         </ReadLink>
       )}
 
-      <article className="px-6 pb-8 pt-4 sm:px-12">
+      <article className="read-col px-6 pb-8 pt-5 md:px-8 md:pt-8">
         {loading && !verses.length ? (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -351,7 +353,7 @@ export default function ReaderView() {
             )}
           </div>
         ) : (
-          <div className="scripture-flow" style={{ fontSize: `${16 * scale}px` }}>
+          <div className="scripture-flow" style={{ fontSize: `calc(var(--read-size) * ${scale})` }}>
             {groups.map((g, gi) => (
               <div key={gi}>
                 {g.heading && (
@@ -414,11 +416,11 @@ export default function ReaderView() {
       </article>
 
       <div
-        className="sticky bottom-0 z-20 -mb-24 border-t border-accent/40 bg-surface px-6 pt-2 sm:px-12"
+        className="sticky bottom-0 z-20 -mb-24 border-t border-accent/40 bg-surface pt-2"
         // Extends under the translucent bottom nav so verses never show through it.
         style={{ paddingBottom: "calc(88px + env(safe-area-inset-bottom))" }}
       >
-        <div className="flex items-center justify-between text-ink">
+        <div className="read-col flex items-center justify-between px-6 text-ink md:px-8">
           <ToolbarBtn label={t.textSize} onClick={() => setShowSize((s) => !s)}>
             <span className="text-[15px] font-medium">Aa</span>
           </ToolbarBtn>

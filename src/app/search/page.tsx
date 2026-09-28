@@ -101,7 +101,8 @@ export default function SearchPage() {
   const term = q.trim();
 
   return (
-    <div className="min-h-full bg-surface px-5 pt-3">
+    <div className="min-h-full bg-surface">
+      <div className="read-col px-5 pt-3 md:px-8 md:pt-6">
       {/* Search bar */}
       <form
         onSubmit={(e) => {
@@ -224,6 +225,7 @@ export default function SearchPage() {
               </li>
             ))}
         </ul>
+      </div>
       </div>
     </div>
   );

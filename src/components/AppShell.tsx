@@ -34,7 +34,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <OfflineBanner />
       <div
         className={
-          "mx-auto flex min-h-screen w-full max-w-xl flex-col " +
+          "mx-auto flex min-h-screen w-full shell-w flex-col " +
           (dark ? "bg-navy text-white" : "bg-bg")
         }
       >
