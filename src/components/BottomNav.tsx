@@ -32,7 +32,7 @@ function useLabels() {
 
 const items: Item[] = [
   { href: "/listen", label: "listen", icon: HeadphonesIcon, match: (p) => p.startsWith("/listen") },
-  { href: "/", label: "bible", icon: BookIcon, match: (p) => p === "/" || p.startsWith("/read") || p.startsWith("/search") || p.startsWith("/settings") },
+  { href: "/", label: "bible", icon: BookIcon, match: (p) => p === "/" || p.startsWith("/read") || p.startsWith("/search") || p.startsWith("/settings") || p.startsWith("/progress") },
   { href: "/today", label: "today", icon: SunIcon, match: (p) => p.startsWith("/today") },
   { href: "/prayers", label: "prayers", icon: HandsIcon, match: (p) => p.startsWith("/prayers") },
   { href: "/journal", label: "journal", icon: PenIcon, match: (p) => p.startsWith("/journal") },
@@ -44,7 +44,7 @@ export default function BottomNav() {
 
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center">
-      <div className="pointer-events-auto safe-bottom w-full max-w-xl border-t border-line bg-surface/90 px-2 pb-1 pt-2 backdrop-blur-lg">
+      <div className="pointer-events-auto safe-bottom w-full shell-w border-t border-line bg-surface/90 px-2 pb-1 pt-2 backdrop-blur-lg">
         <ul className="flex items-stretch justify-between">
           {items.map((it) => {
             const active = it.match(pathname);

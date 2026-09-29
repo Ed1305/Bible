@@ -28,7 +28,7 @@ const VOTD = [
 ];
 
 const accentClasses: Record<string, string> = {
-  blue: "from-accent to-[#41618f]",
+  blue: "from-accent to-[#b3121a]",
   green: "from-verdant to-[#559277]",
   gold: "from-gold to-[#c39a4d]",
 };
@@ -50,7 +50,7 @@ export default function TodayPage() {
   const tr = getTranslation(settings.translation);
 
   return (
-    <div className="px-4 pt-2">
+    <div className="px-4 pt-2 md:px-6">
       <header className="flex items-center gap-3 pt-1">
         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gold/20 text-gold">
           <SunIcon className="h-6 w-6" />
@@ -68,7 +68,7 @@ export default function TodayPage() {
         translation="ESV"
         book={votd.book}
         chapter={votd.chapter}
-        className="mt-4 block overflow-hidden rounded-[20px] bg-gradient-to-br from-[#2b3a55] to-[#41618f] p-5 text-white shadow-soft"
+        className="mt-4 block overflow-hidden rounded-[20px] bg-gradient-to-br from-navy-2 to-navy p-5 text-white shadow-soft"
       >
         <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
           {t.verseOfDay}
@@ -93,7 +93,7 @@ export default function TodayPage() {
           ))}
         </div>
       ) : (
-        <ul className="space-y-3 pb-6">
+        <ul className="grid gap-3 pb-6 md:grid-cols-2">
           {plans.map((p) => {
             const done = completedDays(p.slug).length;
             const pct = Math.round((done / p.durationDays) * 100);

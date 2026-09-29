@@ -1,5 +1,5 @@
 // Lumina Bible service worker — offline-first caching.
-const VERSION = "lumina-v3";
+const VERSION = "lumina-v5";
 const SHELL_CACHE = `${VERSION}-shell`;
 const API_CACHE = `${VERSION}-api`;
 const ASSET_CACHE = `${VERSION}-assets`;
@@ -11,6 +11,7 @@ const SHELL_URLS = [
   "/listen",
   "/today",
   "/search",
+  "/progress",
   "/prayers",
   "/journal",
   "/settings",
@@ -19,13 +20,74 @@ const SHELL_URLS = [
   "/bible/manifest.json",
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(SHELL_CACHE).then((cache) =>
-      Promise.allSettled(SHELL_URLS.map((u) => cache.add(u))),
-    ),
+const API_WARM_URLS = ["/api/plans", "/api/available"];
+
+// Pull every /_next/static script, style and font a page references.
+function assetUrls(html) {
+  const out = new Set();
+  const re = /\/_next\/static\/[^"'\s)\\]+/g;
+  let m;
+  while ((m = re.exec(html))) out.add(m[0]);
+  return [...out];
+}
+
+/**
+ * Cache every app screen *and* the build assets each one needs, plus the
+ * reading-plan pages, so the whole app (not only Bible text) works offline.
+ * Safe to run repeatedly: assets already cached are skipped.
+ */
+async function precacheApp() {
+  const shell = await caches.open(SHELL_CACHE);
+  const assets = await caches.open(ASSET_CACHE);
+  const api = await caches.open(API_CACHE);
+
+  const pages = [...SHELL_URLS];
+  try {
+    const res = await fetch("/api/plans", { cache: "no-cache" });
+    if (res.ok) {
+      await api.put("/api/plans", res.clone());
+      const { plans = [] } = await res.json();
+      for (const p of plans) if (p.slug) pages.push(`/today/${p.slug}`);
+    }
+  } catch {
+    /* offline — keep whatever is cached */
+  }
+  await Promise.allSettled(
+    API_WARM_URLS.filter((u) => u !== "/api/plans").map(async (u) => {
+      const res = await fetch(u, { cache: "no-cache" });
+      if (res.ok) await api.put(u, res);
+    }),
   );
+
+  const wanted = new Set();
+  await Promise.allSettled(
+    pages.map(async (u) => {
+      const res = await fetch(u, { cache: "no-cache" });
+      if (!res.ok) return;
+      await shell.put(u, res.clone());
+      if ((res.headers.get("content-type") || "").includes("text/html")) {
+        for (const a of assetUrls(await res.text())) wanted.add(a);
+      }
+    }),
+  );
+  await Promise.allSettled(
+    [...wanted].map(async (u) => {
+      if (await assets.match(u)) return;
+      const res = await fetch(u);
+      if (res.ok) await assets.put(u, res);
+    }),
+  );
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(precacheApp().catch(() => {}));
   self.skipWaiting();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "warm-app") {
+    event.waitUntil(precacheApp().catch(() => {}));
+  }
 });
 
 self.addEventListener("activate", (event) => {

@@ -60,7 +60,7 @@ export function Segmented<T extends string>({
 
 export function Avatar({ label }: { label: string }) {
   return (
-    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-accent to-[#3f5f92] text-sm font-semibold text-white">
+    <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-accent to-navy text-sm font-semibold text-white">
       {label}
     </div>
   );
@@ -131,13 +131,13 @@ export function Sheet({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop safe-bottom relative w-full max-w-xl rounded-t-[24px] border border-line bg-surface p-5 shadow-float"
+        className="animate-pop safe-bottom relative w-full max-w-xl rounded-t-[24px] border border-line bg-surface p-5 shadow-float md:max-w-2xl md:rounded-[24px] md:p-7"
       >
-        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-line" />
+        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-line md:hidden" />
         <button
           onClick={onClose}
           className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-muted"
@@ -145,7 +145,7 @@ export function Sheet({
         >
           <CloseIcon className="h-4 w-4" />
         </button>
-        <div className="max-h-[70vh] overflow-y-auto">{children}</div>
+        <div className="max-h-[70vh] overflow-y-auto pb-2 md:max-h-[80vh]">{children}</div>
       </div>
     </div>
   );

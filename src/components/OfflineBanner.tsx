@@ -9,7 +9,7 @@ export default function OfflineBanner() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-2 safe-top">
-      <div className="pointer-events-auto flex w-full max-w-xl items-center justify-between rounded-xl bg-[#2b3340] px-4 py-2 text-white shadow-float">
+      <div className="pointer-events-auto flex w-full shell-w items-center justify-between rounded-xl bg-[#2b3340] px-4 py-2 text-white shadow-float">
         <div className="flex items-center gap-2">
           <WifiOffIcon className="h-4 w-4" />
           <span className="text-xs font-semibold tracking-wide">{t.offline}</span>

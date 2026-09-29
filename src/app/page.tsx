@@ -7,6 +7,7 @@ import { BOOKS, bookName, type BookMeta } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
 import { getOfflineAvailability } from "@/lib/offline";
 import { ReadLink } from "@/components/ReadLink";
+import { PassagePicker } from "@/components/PassagePicker";
 import { Avatar, Segmented, Sheet } from "@/components/ui";
 import {
   SearchIcon,
@@ -17,6 +18,7 @@ import {
   ChevronRight,
   SettingsIcon,
   GlobeIcon,
+  ProgressIcon,
 } from "@/components/icons";
 
 type AvailMap = Record<string, Record<string, number[]>>;
@@ -108,6 +110,13 @@ export default function BibleHome() {
             <SearchIcon className="h-5 w-5" />
           </Link>
           <Link
+            href="/progress"
+            className="grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface-2"
+            aria-label="Reading progress"
+          >
+            <ProgressIcon className="h-5 w-5" />
+          </Link>
+          <Link
             href="/today"
             className="relative grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface-2"
             aria-label={t.today}
@@ -131,7 +140,7 @@ export default function BibleHome() {
           translation={user.lastRead.translation}
           book={user.lastRead.book}
           chapter={user.lastRead.chapter}
-          className="mt-4 flex items-center justify-between rounded-[18px] bg-gradient-to-r from-accent to-[#41618f] p-4 text-white shadow-soft"
+          className="mt-4 flex items-center justify-between rounded-[18px] bg-gradient-to-r from-navy-2 to-navy p-4 text-white shadow-soft"
         >
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
@@ -158,7 +167,7 @@ export default function BibleHome() {
       </div>
 
       {/* Book list */}
-      <ul className="mt-3 space-y-2 pb-6">
+      <ul className="mt-3 grid gap-2 pb-6 md:grid-cols-2 lg:grid-cols-3">
         {books.map((b) => {
           const c = counts[b.slug];
           const has = (availForTr[b.slug]?.length ?? 0) > 0;
@@ -215,25 +224,11 @@ export default function BibleHome() {
 
       {picking && (
         <Sheet onClose={() => setPicking(null)}>
-          <p className="mb-1 text-center font-serif text-lg font-semibold">
-            {bookName(picking.slug, lang)}
-          </p>
-          <p className="mb-4 text-center text-[12px] font-medium uppercase tracking-wider text-muted">
-            {t.selectChapter}
-          </p>
-          <div className="grid grid-cols-6 gap-2">
-            {Array.from({ length: picking.chapters }, (_, i) => i + 1).map((c) => (
-              <ReadLink
-                key={c}
-                translation={settings.translation}
-                book={picking.slug}
-                chapter={c}
-                className="grid h-11 place-items-center rounded-xl bg-surface-2 text-sm font-medium text-ink hover:bg-line"
-              >
-                {c}
-              </ReadLink>
-            ))}
-          </div>
+          <PassagePicker
+            translation={settings.translation}
+            initialBook={picking.slug}
+            onDone={() => setPicking(null)}
+          />
         </Sheet>
       )}
     </div>

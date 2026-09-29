@@ -9,6 +9,7 @@ import StatusBar from "./StatusBar";
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const overlay = pathname === "/display";
+  const dark = pathname === "/progress";
 
   useEffect(() => {
     const root = document.documentElement;
@@ -31,7 +32,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <>
       <OfflineBanner />
-      <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col bg-bg">
+      <div
+        className={
+          "mx-auto flex min-h-screen w-full shell-w flex-col " +
+          (dark ? "bg-navy text-white" : "bg-bg")
+        }
+      >
         <StatusBar />
         <main className="flex-1 pb-24">{children}</main>
       </div>

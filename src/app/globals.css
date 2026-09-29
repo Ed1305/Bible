@@ -1,38 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f4f7fb;
+  --bg: #f5f6fa;
   --surface: #ffffff;
-  --surface-2: #eef2f8;
-  --border: #e7ecf3;
-  --text: #22272e;
-  --text-muted: #7c8794;
-  --accent: #5b7fb4;
-  --accent-soft: #eaf1fb;
+  --surface-2: #eef0f5;
+  --border: #e4e7ee;
+  --text: #2b2f3a;
+  --text-muted: #7a8090;
+  --accent: #e3171e;
+  --accent-soft: #fdecec;
+  --navy: #1c2140;
+  --navy-2: #262c4f;
+  --navy-line: #4a5173;
   --green: #6fae8f;
   --green-soft: #e8f4ee;
   --gold: #d9b26a;
   --highlight: #f6ead0;
   --danger: #d98a7a;
-  --verse-num: #c62828;
+  --verse-num: #e3171e;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --bg: #11151c;
-  --surface: #1a2029;
-  --surface-2: #242b36;
-  --border: #2e3642;
-  --text: #e8edf4;
-  --text-muted: #93a0b0;
-  --accent: #7b9cc9;
-  --accent-soft: #243044;
+  --bg: #151a33;
+  --surface: #1c2140;
+  --surface-2: #262c4f;
+  --border: #323a60;
+  --text: #eceef6;
+  --text-muted: #9aa0ba;
+  --accent: #ff3b41;
+  --accent-soft: #3a2340;
+  --navy: #0f1329;
+  --navy-2: #1c2140;
+  --navy-line: #4a5173;
   --green: #7fbf9a;
   --green-soft: #1e3228;
   --gold: #d9b26a;
   --highlight: #3d3424;
   --danger: #e08b7c;
-  --verse-num: #ff6b6b;
+  --verse-num: #ff4d52;
   color-scheme: dark;
 }
 
@@ -45,6 +51,9 @@
   --color-muted: var(--text-muted);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-navy-line: var(--navy-line);
   --color-verdant: var(--green);
   --color-verdant-soft: var(--green-soft);
   --color-gold: var(--gold);
@@ -52,6 +61,21 @@
   --font-sans: Calibri, Carlito, "Segoe UI", system-ui, sans-serif;
   --font-serif: Calibri, Carlito, "Segoe UI", system-ui, sans-serif;
 }
+
+/* Responsive app width and reading size: phone → tablet → desktop. */
+:root {
+  --shell: 36rem;
+  --read-size: 17px;
+}
+@media (min-width: 768px) {
+  :root { --shell: 48rem; --read-size: 19px; }
+}
+@media (min-width: 1024px) {
+  :root { --shell: 64rem; --read-size: 20px; }
+}
+.shell-w { max-width: var(--shell); }
+/* Comfortable line length for scripture (~65–75 characters). */
+.read-col { max-width: 42rem; margin-inline: auto; width: 100%; }
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -99,6 +123,41 @@ input, select, textarea, button {
   font-family: Calibri, Carlito, "Segoe UI", system-ui, sans-serif;
   line-height: 1.55;
   color: var(--text);
+}
+
+/* Flowing paragraph with inline red verse numbers (reader). */
+.scripture-flow {
+  line-height: 1.8;
+  color: var(--text);
+  letter-spacing: 0.005em;
+  text-rendering: optimizeLegibility;
+}
+.scripture-flow .v {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.12s;
+}
+.scripture-flow .v-num {
+  color: var(--verse-num);
+  font-weight: 700;
+  font-size: 0.95em;
+  margin-right: 0.2em;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.scripture-flow .v {
+  scroll-margin-top: 12rem;
+}
+/* Selected / deep-linked verse: underlined in red. */
+.scripture-flow .v.is-active {
+  text-decoration-line: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+  text-decoration-skip-ink: none;
+}
+.scripture-flow .v.is-highlighted {
+  background: var(--highlight);
 }
 
 /* Each verse is a row: wrapping text on the left, number on the right. */
@@ -150,6 +209,18 @@ input, select, textarea, button {
 }
 .animate-pop {
   animation: pop-in 0.14s ease-out;
+}
+
+/* Picker: each step slides in from the right as you move forward. */
+@keyframes step-in {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-step {
+  animation: step-in 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-step, .animate-pop { animation: none; }
 }
 
 /* Safe area padding for iOS installed PWA */

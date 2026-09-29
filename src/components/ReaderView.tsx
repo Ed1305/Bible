@@ -1,35 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useStore, type ChapterData } from "@/lib/store";
 import { BOOKS_BY_SLUG, bookName } from "@/lib/bible/books";
 import { getTranslation } from "@/lib/bible/translations";
 import { parseReadLocation } from "@/lib/bible/href";
 import { downloadPack, isPackDownloaded } from "@/lib/offline";
 import { ReadLink } from "@/components/ReadLink";
+import Link from "next/link";
 import {
   BackIcon,
-  AAIcon,
   PenIcon,
-  HeartIcon,
   ShareIcon,
   BookmarkIcon,
   ChevronRight,
-  PlayIcon,
   DownloadIcon,
   CheckIcon,
+  MenuIcon,
+  HomeIcon,
+  SearchIcon,
+  LibraryIcon,
+  HeadphonesIcon,
+  ProgressIcon,
+  SpeakerIcon,
+  CommentIcon,
 } from "@/components/icons";
 import { Sheet } from "@/components/ui";
+import { PassagePicker } from "@/components/PassagePicker";
 
 export default function ReaderView() {
-  const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
   const ref = parseReadLocation(pathname, search);
   const translation = ref.translation;
   const book = ref.book;
   const chapter = ref.chapter;
+  const targetVerse = ref.verse;
 
   const {
     fetchChapter,
@@ -50,7 +57,15 @@ export default function ReaderView() {
   const meta = BOOKS_BY_SLUG[book];
   const [data, setData] = useState<ChapterData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<number | null>(null);
+  // A tap only overrides the ?verse= deep link it was made under; a new deep link
+  // (or chapter change, which resets it) selects the linked verse again.
+  const [picked, setPicked] = useState<{ link: number | null; verse: number | null } | null>(null);
+  const selected = picked && picked.link === targetVerse ? picked.verse : targetVerse;
+  const setSelected = useCallback(
+    (verse: number | null | undefined) =>
+      setPicked(verse === undefined ? null : { link: targetVerse, verse }),
+    [targetVerse],
+  );
   const [showSize, setShowSize] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
@@ -58,7 +73,6 @@ export default function ReaderView() {
   const [downloaded, setDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [toast, setToast] = useState("");
-  const toolbarRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -69,7 +83,7 @@ export default function ReaderView() {
       setLoading(false);
     });
     setLastRead(book, chapter);
-    setSelected(null);
+    setPicked(null);
     setShowChapters(false);
     setDownloaded(!!getCachedChapter(translation, book, chapter));
     void isPackDownloaded(translation).then((yes) => {
@@ -79,6 +93,19 @@ export default function ReaderView() {
       active = false;
     };
   }, [translation, book, chapter, fetchChapter, setLastRead, getCachedChapter]);
+
+  // Deep link (?verse=N): select that verse and bring it into view once loaded.
+  useEffect(() => {
+    if (!targetVerse || !data || data.book !== book || data.chapter !== chapter) return;
+    if (!data.verses.some((v) => v.verse === targetVerse)) return;
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`v-${targetVerse}`);
+      if (!el) return;
+      const header = document.querySelector<HTMLElement>("[data-reader-header]");
+      const offset = (header?.offsetHeight ?? 0) + 16;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
+    });
+  }, [targetVerse, data, book, chapter]);
 
   const showToast = useCallback((m: string) => {
     setToast(m);
@@ -92,7 +119,6 @@ export default function ReaderView() {
   const scale = settings.textScale;
   const shownTranslation = data?.translation || translation;
   const shownTr = getTranslation(shownTranslation);
-  const chapterLabel = `${bookName(book, lang)} ${chapter} · ${shownTr.abbr}`;
 
   const onShare = useCallback(
     async (verse: number, text: string) => {
@@ -130,55 +156,123 @@ export default function ReaderView() {
     }
   }, [downloading, translation, showToast, t.downloaded]);
 
-  const verses = data?.verses ?? [];
+  const verses = useMemo(() => data?.verses ?? [], [data]);
 
   const noteVerse = useMemo(
     () => verses.find((v) => v.verse === noteFor),
     [verses, noteFor],
   );
 
+  const target = selected ?? 1;
+  const targetBookmarked = isBookmarked(book, chapter, target);
+  const selectedVerse = verses.find((v) => v.verse === selected);
+
+  const requireVerse = (fn: (verse: number) => void) => {
+    if (selected === null) {
+      showToast("Tap a verse first");
+      return;
+    }
+    fn(selected);
+  };
+
+  // Group verses under their section headings so each group flows as one paragraph.
+  const groups = useMemo(() => {
+    const out: { heading: string | null; verses: typeof verses }[] = [];
+    for (const v of verses) {
+      if (v.heading || out.length === 0) out.push({ heading: v.heading, verses: [] });
+      out[out.length - 1].verses.push(v);
+    }
+    return out;
+  }, [verses]);
+
+  const sideBtn =
+    "fixed top-1/2 z-20 hidden -translate-y-1/2 place-items-center rounded-full p-1.5 text-ink/70 hover:bg-surface-2 hover:text-ink sm:grid";
+
   return (
-    <div className="min-h-full">
-      <div className="sticky top-0 z-30 border-b border-line/70 bg-bg/85 backdrop-blur-md">
-        <div className="flex items-center justify-between px-3 py-2.5">
-          <button
-            onClick={() => router.back()}
-            className="grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-surface-2"
-            aria-label="Back"
-          >
-            <BackIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setShowChapters(true)}
-            className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-muted"
-          >
-            {chapterLabel}
-            <ChevronRight className="h-3.5 w-3.5 rotate-90" />
-          </button>
+    <div className="relative min-h-full bg-surface">
+      {targetBookmarked && (
+        <span
+          aria-hidden="true"
+          className="absolute right-5 top-0 z-40 h-6 w-4 bg-accent [clip-path:polygon(0_0,100%_0,100%_100%,50%_72%,0_100%)]"
+        />
+      )}
+
+      <div data-reader-header className="sticky top-0 z-30 bg-surface">
+        <div className="read-col flex items-center justify-between px-4 pb-2 pt-3 text-ink md:px-6">
+          <IconLink href="/settings" label={t.settings}>
+            <MenuIcon className="h-5 w-5" />
+          </IconLink>
           <div className="flex items-center gap-1">
+            <IconLink href="/" label={t.bible}>
+              <HomeIcon className="h-5 w-5" />
+            </IconLink>
+            <IconLink href="/search" label={t.search}>
+              <SearchIcon className="h-5 w-5" />
+            </IconLink>
             <button
-              onClick={() => void onDownload()}
-              disabled={downloading}
-              className={
-                "grid h-9 w-9 place-items-center rounded-full hover:bg-surface-2 " +
-                (downloaded ? "text-verdant" : "text-ink")
-              }
-              aria-label={t.downloadOffline}
+              onClick={() => setShowChapters(true)}
+              className="grid h-9 w-9 place-items-center rounded-full hover:bg-surface-2"
+              aria-label={t.selectChapter}
             >
-              {downloaded ? <CheckIcon className="h-5 w-5" /> : <DownloadIcon className="h-5 w-5" />}
+              <LibraryIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={() => setShowSize((s) => !s)}
-              className="grid h-9 w-9 place-items-center rounded-full text-ink hover:bg-surface-2"
-              aria-label={t.textSize}
+            <IconLink
+              href={`/listen?translation=${shownTranslation}&book=${book}&chapter=${chapter}`}
+              label={t.listen}
+              plain
             >
-              <AAIcon className="h-5 w-5" />
-            </button>
+              <HeadphonesIcon className="h-5 w-5" />
+            </IconLink>
+            <IconLink href="/progress" label="Reading progress">
+              <ProgressIcon className="h-5 w-5" />
+            </IconLink>
           </div>
         </div>
 
+        <div className="read-col flex items-center justify-between px-6 pb-3 pt-1 md:px-8">
+          <button
+            onClick={() => setShowChapters(true)}
+            className="flex items-baseline gap-2 text-left"
+          >
+            <span className="text-[17px] font-bold uppercase tracking-wide text-accent">
+              {bookName(book, lang)} {chapter}
+            </span>
+            <span className="text-[12px] font-semibold italic text-ink">{shownTr.abbr}</span>
+          </button>
+          <button
+            onClick={() => void onDownload()}
+            disabled={downloading}
+            className={
+              "grid h-8 w-8 place-items-center rounded-full hover:bg-surface-2 " +
+              (downloaded ? "text-verdant" : "text-muted")
+            }
+            aria-label={t.downloadOffline}
+          >
+            {downloaded ? <CheckIcon className="h-4.5 w-4.5" /> : <DownloadIcon className="h-4.5 w-4.5" />}
+          </button>
+        </div>
+
+        <div className="bg-navy text-white">
+        <div className="read-col flex items-center justify-between px-6 py-3 md:px-8">
+          <span className="text-[15px] font-semibold md:text-[16px]">
+            {bookName(book, lang)} {chapter}
+            {selected !== null && <span className="font-normal text-white/60">:{selected}</span>}
+          </span>
+          <button
+            onClick={() => {
+              toggleBookmark(book, chapter, target);
+              showToast(targetBookmarked ? "Removed" : "Bookmarked");
+            }}
+            className="flex items-center gap-1.5 text-[12px] text-white/90"
+          >
+            <BookmarkIcon className={"h-4 w-4 text-accent " + (targetBookmarked ? "fill-accent" : "fill-accent/0")} />
+            {targetBookmarked ? "Bookmarked" : t.bookmark}
+          </button>
+        </div>
+        </div>
+
         {showSize && (
-          <div className="animate-pop mx-3 mb-3 flex items-center gap-3 rounded-2xl border border-line bg-surface p-3 shadow-float">
+          <div className="animate-pop mx-4 mt-3 flex items-center gap-3 rounded-2xl md:mx-auto md:max-w-xl border border-line bg-surface p-3 shadow-float">
             <span className="text-sm text-muted">{t.textSize}</span>
             <button
               onClick={() => setTextScale(scale - 0.1)}
@@ -205,12 +299,28 @@ export default function ReaderView() {
         )}
       </div>
 
-      <article className="px-6 pb-10 pt-4">
-        <h1 className="mb-1 text-center font-serif text-[28px] italic text-ink">
-          {bookName(book, lang)} {chapter}
-        </h1>
-        <div className="mx-auto mb-6 h-px w-10 bg-line" />
+      {prevChapter && (
+        <ReadLink
+          translation={shownTranslation}
+          book={book}
+          chapter={prevChapter}
+          className={sideBtn + " left-[max(0.5rem,calc(50vw_-_var(--shell)/2_+_0.5rem))]"}
+        >
+          <BackIcon className="h-6 w-6" />
+        </ReadLink>
+      )}
+      {nextChapter && (
+        <ReadLink
+          translation={shownTranslation}
+          book={book}
+          chapter={nextChapter}
+          className={sideBtn + " right-[max(0.5rem,calc(50vw_-_var(--shell)/2_+_0.5rem))]"}
+        >
+          <ChevronRight className="h-6 w-6" />
+        </ReadLink>
+      )}
 
+      <article className="read-col px-6 pb-8 pt-5 md:px-8 md:pt-8">
         {loading && !verses.length ? (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -243,121 +353,113 @@ export default function ReaderView() {
             )}
           </div>
         ) : (
-          <div className="scripture" style={{ fontSize: `${17 * scale}px` }}>
-            {verses.map((v) => {
-              const active = selected === v.verse;
-              const hl = isHighlighted(book, chapter, v.verse);
-              const hasNote = !!getNote(book, chapter, v.verse);
-              return (
-                <div key={v.verse} className="relative">
-                  {v.heading && (
-                    <h2 className="mb-1 mt-5 font-sans text-[15px] font-bold text-ink">
-                      {v.heading}
-                    </h2>
-                  )}
-                  <p
-                    onClick={() => setSelected(active ? null : v.verse)}
-                    className={
-                      "verse-row cursor-pointer transition-colors " +
-                      (active ? "is-active " : "") +
-                      (hl ? "is-highlighted " : "")
-                    }
-                  >
-                    <span className="verse-text">
-                      {hl && <span aria-hidden="true">★ </span>}
-                      {v.text}
-                      {hasNote && (
-                        <PenIcon className="mb-0.5 ml-1 inline h-3.5 w-3.5 text-accent" />
-                      )}
-                    </span>
-                    <span className="verse-num">{v.verse}</span>
-                  </p>
-
-                  {active && (
-                    <div
-                      ref={toolbarRef}
-                      className="animate-pop absolute left-0 top-full z-20 mt-1 flex items-center gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-float"
-                    >
-                      <ToolbarBtn
-                        label={t.note}
-                        onClick={() => {
-                          setNoteFor(v.verse);
-                          setNoteDraft(getNote(book, chapter, v.verse));
-                        }}
+          <div className="scripture-flow" style={{ fontSize: `calc(var(--read-size) * ${scale})` }}>
+            {groups.map((g, gi) => (
+              <div key={gi}>
+                {g.heading && (
+                  <h2 className="mb-1 mt-5 text-[0.95em] font-bold text-ink first:mt-0">
+                    {g.heading}
+                  </h2>
+                )}
+                <p className="mb-3">
+                  {g.verses.map((v) => {
+                    const active = selected === v.verse;
+                    const hl = isHighlighted(book, chapter, v.verse);
+                    const hasNote = !!getNote(book, chapter, v.verse);
+                    return (
+                      <span
+                        key={v.verse}
+                        id={`v-${v.verse}`}
+                        onClick={() => setSelected(active ? null : v.verse)}
+                        className={"v " + (active ? "is-active " : "") + (hl ? "is-highlighted" : "")}
                       >
-                        <PenIcon className="h-5 w-5 text-ink" />
-                      </ToolbarBtn>
-                      <ToolbarBtn
-                        label={t.highlight}
-                        onClick={() => {
-                          toggleHighlight(book, chapter, v.verse);
-                          setSelected(null);
-                        }}
-                      >
-                        <HeartIcon
-                          className={"h-5 w-5 " + (hl ? "fill-gold text-gold" : "text-ink")}
-                        />
-                      </ToolbarBtn>
-                      <ToolbarBtn label={t.share} onClick={() => onShare(v.verse, v.text)}>
-                        <ShareIcon className="h-5 w-5 text-ink" />
-                      </ToolbarBtn>
-                      <ToolbarBtn
-                        label={t.bookmark}
-                        onClick={() => {
-                          toggleBookmark(book, chapter, v.verse);
-                          showToast(isBookmarked(book, chapter, v.verse) ? "Removed" : "Bookmarked");
-                        }}
-                      >
-                        <BookmarkIcon
-                          className={
-                            "h-5 w-5 " +
-                            (isBookmarked(book, chapter, v.verse)
-                              ? "fill-verdant text-verdant"
-                              : "text-ink")
-                          }
-                        />
-                      </ToolbarBtn>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                        <span className="v-num">{v.verse}</span>
+                        {v.text}
+                        {hasNote && (
+                          <PenIcon className="mb-0.5 ml-1 inline h-3.5 w-3.5 text-accent" />
+                        )}{" "}
+                      </span>
+                    );
+                  })}
+                </p>
+              </div>
+            ))}
           </div>
         )}
 
-        <div className="mt-10 flex items-center justify-between gap-3">
+        <div className="mt-8 flex items-center justify-between gap-3">
           {prevChapter ? (
             <ReadLink
               translation={shownTranslation}
               book={book}
               chapter={prevChapter}
-              className="flex items-center gap-1 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink shadow-soft"
+              className="flex items-center gap-1 rounded-full border border-line px-4 py-2 text-sm font-medium text-ink"
             >
               <BackIcon className="h-4 w-4" /> {chapter - 1}
             </ReadLink>
           ) : (
             <span />
           )}
-          <a
-            href={`/listen?translation=${shownTranslation}&book=${book}&chapter=${chapter}`}
-            className="flex items-center gap-2 rounded-full bg-verdant px-5 py-2 text-sm font-semibold text-white shadow-soft"
-          >
-            <PlayIcon className="h-4 w-4" /> {t.listen}
-          </a>
           {nextChapter ? (
             <ReadLink
               translation={shownTranslation}
               book={book}
               chapter={nextChapter}
-              className="flex items-center gap-1 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink shadow-soft"
+              className="flex items-center gap-1 rounded-full bg-navy px-4 py-2 text-sm font-medium text-white"
             >
-              {chapter + 1} <ChevronRight className="h-4 w-4" />
+              {bookName(book, lang)} {chapter + 1} <ChevronRight className="h-4 w-4" />
             </ReadLink>
           ) : (
             <span />
           )}
         </div>
       </article>
+
+      <div
+        className="sticky bottom-0 z-20 -mb-24 border-t border-accent/40 bg-surface pt-2"
+        // Extends under the translucent bottom nav so verses never show through it.
+        style={{ paddingBottom: "calc(88px + env(safe-area-inset-bottom))" }}
+      >
+        <div className="read-col flex items-center justify-between px-6 text-ink md:px-8">
+          <ToolbarBtn label={t.textSize} onClick={() => setShowSize((s) => !s)}>
+            <span className="text-[15px] font-medium">Aa</span>
+          </ToolbarBtn>
+          <ToolbarBtn
+            label={t.highlight}
+            onClick={() =>
+              requireVerse((verse) => {
+                toggleHighlight(book, chapter, verse);
+                setSelected(null);
+              })
+            }
+          >
+            <PenIcon className={"h-5 w-5 " + (selected !== null && isHighlighted(book, chapter, selected) ? "text-accent" : "")} />
+          </ToolbarBtn>
+          <a
+            href={`/listen?translation=${shownTranslation}&book=${book}&chapter=${chapter}`}
+            aria-label={t.listen}
+            className="grid h-10 w-10 place-items-center rounded-xl hover:bg-surface-2"
+          >
+            <SpeakerIcon className="h-5 w-5" />
+          </a>
+          {selectedVerse && (
+            <ToolbarBtn label={t.share} onClick={() => onShare(selectedVerse.verse, selectedVerse.text)}>
+              <ShareIcon className="h-5 w-5" />
+            </ToolbarBtn>
+          )}
+          <ToolbarBtn
+            label={t.note}
+            onClick={() =>
+              requireVerse((verse) => {
+                setNoteFor(verse);
+                setNoteDraft(getNote(book, chapter, verse));
+              })
+            }
+          >
+            <CommentIcon className="h-5 w-5" />
+          </ToolbarBtn>
+        </div>
+      </div>
 
       {noteFor !== null && (
         <Sheet onClose={() => setNoteFor(null)}>
@@ -394,27 +496,13 @@ export default function ReaderView() {
 
       {showChapters && (
         <Sheet onClose={() => setShowChapters(false)}>
-          <p className="mb-3 text-center font-serif text-lg font-semibold">
-            {bookName(book, lang)}
-          </p>
-          <div className="grid grid-cols-6 gap-2">
-            {Array.from({ length: totalChapters }, (_, i) => i + 1).map((c) => (
-              <ReadLink
-                key={c}
-                translation={shownTranslation}
-                book={book}
-                chapter={c}
-                className={
-                  "grid h-11 place-items-center rounded-xl text-sm font-medium " +
-                  (c === chapter
-                    ? "bg-accent text-white"
-                    : "bg-surface-2 text-ink hover:bg-line")
-                }
-              >
-                {c}
-              </ReadLink>
-            ))}
-          </div>
+          <PassagePicker
+            translation={shownTranslation}
+            initialBook={book}
+            initialChapter={chapter}
+            initialStep="book"
+            onDone={() => setShowChapters(false)}
+          />
         </Sheet>
       )}
 
@@ -424,6 +512,33 @@ export default function ReaderView() {
         </div>
       )}
     </div>
+  );
+}
+
+function IconLink({
+  href,
+  label,
+  plain,
+  children,
+}: {
+  href: string;
+  label: string;
+  plain?: boolean;
+  children: React.ReactNode;
+}) {
+  const cls = "grid h-9 w-9 place-items-center rounded-full hover:bg-surface-2";
+  // Listen uses a full navigation so audio starts from a clean page.
+  if (plain) {
+    return (
+      <a href={href} aria-label={label} className={cls}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} aria-label={label} className={cls}>
+      {children}
+    </Link>
   );
 }
 

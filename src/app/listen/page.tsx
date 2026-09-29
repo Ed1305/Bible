@@ -343,7 +343,7 @@ function ListenInner() {
 
       <div className="mt-4 rounded-[22px] border border-line bg-surface p-5 shadow-soft">
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-accent to-[#41618f] text-white">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-navy-2 to-navy text-white">
             <BookIcon className="h-8 w-8" />
           </div>
           <div className="min-w-0">
