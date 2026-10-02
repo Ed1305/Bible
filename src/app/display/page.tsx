@@ -11,9 +11,13 @@
  *   Width  1920   Height 1080
  *   Shutdown source when not visible           UNCHECKED
  *   Refresh browser when scene becomes active  UNCHECKED
+ *
+ * /display?layout=split shows the full scripture-reading layout instead
+ * (church banner, camera window, white verse panel) — see ScriptureSplit.
  */
 
 import { useEffect, useRef, useState } from 'react'
+import ScriptureSplit from '@/components/ScriptureSplit'
 
 type LiveVerse = {
   id: number
@@ -104,6 +108,16 @@ const css = `
 `
 
 export default function Display() {
+  // Read the layout from the URL on the client (no Suspense needed, works in OBS).
+  const [layout, setLayout] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    setLayout(new URLSearchParams(window.location.search).get('layout'))
+  }, [])
+  if (layout === undefined) return null
+  return layout === 'split' ? <ScriptureSplit /> : <LowerThird />
+}
+
+function LowerThird() {
   const [shown, setShown] = useState<LiveVerse | null>(null)
   const [on, setOn] = useState(false)
 
