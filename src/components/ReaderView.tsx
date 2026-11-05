@@ -25,6 +25,8 @@ import {
   ProgressIcon,
   SpeakerIcon,
   CommentIcon,
+  SunIcon,
+  MoonIcon,
 } from "@/components/icons";
 import { Sheet } from "@/components/ui";
 import { PassagePicker } from "@/components/PassagePicker";
@@ -44,6 +46,7 @@ export default function ReaderView() {
     lang,
     settings,
     setTextScale,
+    setTheme,
     toggleBookmark,
     toggleHighlight,
     setNote,
@@ -117,6 +120,7 @@ export default function ReaderView() {
   const nextChapter = chapter < totalChapters ? chapter + 1 : null;
 
   const scale = settings.textScale;
+  const dark = settings.theme === "dark";
   const shownTranslation = data?.translation || translation;
   const shownTr = getTranslation(shownTranslation);
 
@@ -239,6 +243,16 @@ export default function ReaderView() {
             </span>
             <span className="text-[12px] font-semibold italic text-ink">{shownTr.abbr}</span>
           </button>
+          <div className="flex items-center gap-1">
+          <button
+            onClick={() => setTheme(dark ? "light" : "dark")}
+            className="grid h-8 w-8 place-items-center rounded-full text-muted hover:bg-surface-2 hover:text-ink"
+            aria-label={dark ? `${t.theme}: ${t.light}` : `${t.theme}: ${t.dark}`}
+            aria-pressed={dark}
+            title={dark ? t.light : t.dark}
+          >
+            {dark ? <SunIcon className="h-4.5 w-4.5" /> : <MoonIcon className="h-4.5 w-4.5" />}
+          </button>
           <button
             onClick={() => void onDownload()}
             disabled={downloading}
@@ -250,6 +264,7 @@ export default function ReaderView() {
           >
             {downloaded ? <CheckIcon className="h-4.5 w-4.5" /> : <DownloadIcon className="h-4.5 w-4.5" />}
           </button>
+          </div>
         </div>
 
         <div className="bg-navy text-white">
