@@ -227,6 +227,9 @@ export default function ReaderView() {
             >
               <HeadphonesIcon className="h-5 w-5" />
             </IconLink>
+            <IconLink href="/bookmarks" label="Bookmarks">
+              <BookmarkIcon className="h-5 w-5" />
+            </IconLink>
             <IconLink href="/progress" label="Reading progress">
               <ProgressIcon className="h-5 w-5" />
             </IconLink>

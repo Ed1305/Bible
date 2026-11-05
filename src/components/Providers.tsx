@@ -1,6 +1,7 @@
 "use client";
 
 import { warmAppShell } from "@/lib/offline";
+import UpdateWatcher from "@/components/UpdateWatcher";
 import { useEffect, type ReactNode } from "react";
 import { StoreProvider, useStore } from "@/lib/store";
 
@@ -29,7 +30,10 @@ export default function Providers({ children }: { children: ReactNode }) {
     if ("serviceWorker" in navigator) {
       const onLoad = () => {
         navigator.serviceWorker
-          .register("/sw.js")
+          // Versioned URL: each deployment installs a fresh worker and caches.
+          .register(`/sw.js?v=${process.env.NEXT_PUBLIC_APP_VERSION ?? "dev"}`, {
+            updateViaCache: "none",
+          })
           .then(() => {
             // Keep the offline copy of the app in step with the current build.
             try {
@@ -53,6 +57,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <StoreProvider>
       <ThemeSync />
+      <UpdateWatcher />
       {children}
     </StoreProvider>
   );

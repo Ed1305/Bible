@@ -1,5 +1,8 @@
 // Lumina Bible service worker — offline-first caching.
-const VERSION = "lumina-v7";
+// Registered as /sw.js?v=<deployment id>, so every deploy installs a fresh
+// worker with fresh caches (old ones are dropped on activate).
+const BUILD = new URL(self.location.href).searchParams.get("v") || "dev";
+const VERSION = `lumina-${BUILD}`;
 const SHELL_CACHE = `${VERSION}-shell`;
 const API_CACHE = `${VERSION}-api`;
 const ASSET_CACHE = `${VERSION}-assets`;
@@ -12,10 +15,16 @@ const SHELL_URLS = [
   "/today",
   "/search",
   "/progress",
+  "/bookmarks",
   "/prayers",
   "/journal",
   "/settings",
   "/manifest.webmanifest",
+  "/favicon.ico",
+  "/icons/icon.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/apple-touch-icon.png",
   "/offline.html",
   "/bible/manifest.json",
 ];
@@ -138,8 +147,8 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Never cache health checks.
-  if (url.pathname === "/api/health") return;
+  // Never cache health or version checks.
+  if (url.pathname === "/api/health" || url.pathname === "/api/version") return;
 
   // Navigations: network-first, fall back to the matching app shell.
   if (request.mode === "navigate") {
@@ -213,7 +222,25 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: cache-first.
+  // Other public files (manifest, icons, splash images): network-first, so a
+  // new deploy shows up right away; the cached copy is the offline fallback.
+  if (!url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(
+      caches.open(ASSET_CACHE).then(async (cache) => {
+        try {
+          const res = await fetch(request);
+          if (res.ok) cache.put(request, res.clone());
+          return res;
+        } catch {
+          // Any cache: the manifest and icons are precached with the shell.
+          return (await caches.match(request)) || new Response("", { status: 504 });
+        }
+      }),
+    );
+    return;
+  }
+
+  // Build assets have content-hashed names: cache-first.
   event.respondWith(
     caches.open(ASSET_CACHE).then(async (cache) => {
       const cached = await cache.match(request);
