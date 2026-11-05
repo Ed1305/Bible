@@ -223,6 +223,76 @@ input, select, textarea, button {
   .animate-step, .animate-pop { animation: none; }
 }
 
+/* ------------------------------- Splash screen ------------------------------- */
+/* Server-rendered so it paints before any JS; SplashScreen.tsx fades it out. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: linear-gradient(180deg, #2b3260 0%, #161a33 100%);
+  color: #fff;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+.splash-icon {
+  width: 132px;
+  height: 132px;
+  border-radius: 30px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  animation: splash-in 0.6s ease-out both;
+}
+.splash-name {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  animation: splash-in 0.6s 0.12s ease-out both;
+}
+.splash-tagline {
+  margin-top: -10px;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  animation: splash-in 0.6s 0.2s ease-out both;
+}
+.splash-dots {
+  position: absolute;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 8px;
+}
+.splash-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #e3171e;
+  animation: splash-dot 1s ease-in-out infinite;
+}
+.splash-dots span:nth-child(2) { animation-delay: 0.15s; }
+.splash-dots span:nth-child(3) { animation-delay: 0.3s; }
+.splash.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* Already shown this visit, or the OBS overlay: never show it. */
+html[data-splash="off"] .splash { display: none; }
+@keyframes splash-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes splash-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash, .splash-icon, .splash-name, .splash-tagline, .splash-dots span { animation: none; transition: none; }
+}
+
 /* Safe area padding for iOS installed PWA */
 .safe-top { padding-top: max(env(safe-area-inset-top), 0px); }
 .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
