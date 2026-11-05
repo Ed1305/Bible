@@ -93,6 +93,7 @@ interface StoreValue {
   setLastTestament: (testament: Testament) => void;
   verseKey: (book: string, chapter: number, verse: number, translation?: string) => string;
   toggleBookmark: (book: string, chapter: number, verse: number) => void;
+  removeBookmark: (key: string) => void;
   toggleHighlight: (book: string, chapter: number, verse: number) => void;
   setNote: (book: string, chapter: number, verse: number, note: string) => void;
   isBookmarked: (book: string, chapter: number, verse: number) => boolean;
@@ -223,6 +224,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     [verseKey],
   );
+
+  // Remove by full key, so bookmarks saved in another translation can be removed too.
+  const removeBookmark = useCallback((key: string) => {
+    setUser((p) => ({ ...p, bookmarks: p.bookmarks.filter((k) => k !== key) }));
+  }, []);
 
   const toggleHighlight = useCallback(
     (book: string, chapter: number, verse: number) => {
@@ -420,6 +426,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setLastTestament,
       verseKey,
       toggleBookmark,
+      removeBookmark,
       toggleHighlight,
       setNote,
       isBookmarked,
@@ -439,7 +446,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [
       ready, online, settings, user, lang, t, setTranslation, setTextScale, setTheme,
       setLastTestament, verseKey,
-      toggleBookmark, toggleHighlight, setNote, isBookmarked, isHighlighted, getNote,
+      toggleBookmark, removeBookmark, toggleHighlight, setNote, isBookmarked, isHighlighted, getNote,
       setLastRead, togglePlanDay, completedDays, addPrayer, togglePrayer, deletePrayer,
       addJournal, deleteJournal, fetchChapter, getCachedChapter,
     ],

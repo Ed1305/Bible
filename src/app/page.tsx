@@ -110,6 +110,13 @@ export default function BibleHome() {
             <SearchIcon className="h-5 w-5" />
           </Link>
           <Link
+            href="/bookmarks"
+            className="grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface-2"
+            aria-label="Bookmarks"
+          >
+            <BookmarkIcon className="h-5 w-5" />
+          </Link>
+          <Link
             href="/progress"
             className="grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-surface-2"
             aria-label="Reading progress"
