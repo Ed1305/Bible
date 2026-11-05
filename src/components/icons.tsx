@@ -253,3 +253,9 @@ export const SummitIcon = (p: P) => (
     <path d="M9 10v5l-2.5 6M9 15l2.5 6M6 12.5l3-1 3.5 1.5" />
   </svg>
 );
+
+export const MoonIcon = (p: P) => (
+  <svg {...base} {...p}>
+    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+  </svg>
+);
