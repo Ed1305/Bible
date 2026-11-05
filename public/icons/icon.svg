@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Lumina Bible app icon: open Bible beneath a glowing cross.
+       Full-bleed square; the motif stays inside the maskable safe zone. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3260"/>
+      <stop offset="1" stop-color="#161a33"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="512" cy="330" r="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0.55"/>
+      <stop offset="0.45" stop-color="#ffb347" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffb347" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cross" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6dc"/>
+      <stop offset="1" stop-color="#ffd27a"/>
+    </linearGradient>
+    <linearGradient id="pageL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fbf7ee"/>
+      <stop offset="1" stop-color="#e9e1cf"/>
+    </linearGradient>
+    <linearGradient id="pageR" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#fbf7ee"/>
+      <stop offset="1" stop-color="#e9e1cf"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="330" r="300" fill="url(#glow)"/>
+
+  <!-- cross -->
+  <rect x="488" y="196" width="48" height="236" rx="10" fill="url(#cross)"/>
+  <rect x="424" y="254" width="176" height="48" rx="10" fill="url(#cross)"/>
+
+  <!-- red cover peeking under the pages -->
+  <path d="M512 520 C 440 478 330 474 244 494 L 244 744 C 330 726 440 730 512 774 C 584 730 694 726 780 744 L 780 494 C 694 474 584 478 512 520 Z" fill="#c8141b"/>
+  <!-- page block edges -->
+  <path d="M512 506 C 444 466 336 462 258 480 L 258 724 C 336 706 444 710 512 750 C 580 710 688 706 766 724 L 766 480 C 688 462 580 466 512 506 Z" fill="#d9cfb8"/>
+  <!-- pages -->
+  <path d="M512 490 C 446 450 340 446 268 464 L 268 708 C 340 690 446 694 512 734 Z" fill="url(#pageL)"/>
+  <path d="M512 490 C 578 450 684 446 756 464 L 756 708 C 684 690 578 694 512 734 Z" fill="url(#pageR)"/>
+  <!-- spine -->
+  <path d="M512 490 L 512 734" stroke="#cfc3a8" stroke-width="4"/>
+  <!-- text lines -->
+  <g stroke="#cdbf9f" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.8">
+    <path d="M308 520 C 360 508 420 510 468 528"/>
+    <path d="M308 568 C 360 556 420 558 468 576"/>
+    <path d="M308 616 C 360 604 420 606 468 624"/>
+    <path d="M716 520 C 664 508 604 510 556 528"/>
+    <path d="M716 568 C 664 556 604 558 556 576"/>
+    <path d="M716 616 C 664 604 604 606 556 624"/>
+  </g>
+
+  <!-- ribbon bookmark -->
+  <path d="M534 700 L 576 696 L 576 846 L 555 824 L 534 846 Z" fill="#e3171e"/>
+</svg>
