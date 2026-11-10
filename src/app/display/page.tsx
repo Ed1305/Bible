@@ -14,7 +14,7 @@
  *
  * /display?layout=split shows the full scripture-reading layout instead
  * (church banner, camera window, white verse panel) — see ScriptureSplit.
- * /display?layout=full is a plain white full screen with only the verse and reference.
+ * /display?layout=full is the same design without the camera window.
  */
 
 import { useEffect, useRef, useState } from 'react'
