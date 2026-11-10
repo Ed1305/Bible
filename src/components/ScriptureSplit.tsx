@@ -96,19 +96,18 @@ const css = `
   .ss-foot-r { display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 24px; letter-spacing: 4px; color: #fff; }
   .ss-foot-dot { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #d8b45a; display: grid;
     place-items: center; font-size: 13px; color: #f3dc95; }
-  /* /display?layout=full — plain scripture screen, no camera window */
-  .ss-full .ss-bg { clip-path: none; }
-  .ss-full .ss-camborder { display: none; }
-  .ss-full .ss-panel { left: 48px; width: 1824px; }
-  .ss-full .ss-label, .ss-full .ss-rule { left: 96px; }
-  .ss-full .ss-text { left: 96px; right: 96px; top: 160px; bottom: 64px; }
-  .ss-full .ss-verse { line-height: 1.36; }
-  .ss-full .ss-ref { font-size: 40px; }
+  /* /display?layout=full — plain white full screen with only the scripture */
+  .ss-full { background: #fff; }
+  .ss-full .ss-bg, .ss-full .ss-camborder, .ss-full .ss-bar, .ss-full .ss-label, .ss-full .ss-rule { display: none; }
+  .ss-full .ss-panel { left: 0; top: 0; width: 1920px; height: 1080px; border-radius: 0; box-shadow: none; }
+  .ss-full .ss-text { left: 140px; right: 140px; top: 110px; bottom: 100px; }
+  .ss-full .ss-verse { line-height: 1.36; color: #0b1220; }
+  .ss-full .ss-ref { font-size: 46px; margin-top: 36px; }
 `
 
 export default function ScriptureSplit({ full = false }: { full?: boolean }) {
-  // full = no camera window: the scripture panel spans the whole width with larger text.
-  const maxFont = full ? 76 : MAX_FONT
+  // full = plain white full screen with only the verse and reference (no banner, no camera window).
+  const maxFont = full ? 84 : MAX_FONT
   const [shown, setShown] = useState<LiveVerse | null>(null)
   const [on, setOn] = useState(false)
   const [fontSize, setFontSize] = useState(maxFont)
@@ -186,13 +185,25 @@ export default function ScriptureSplit({ full = false }: { full?: boolean }) {
   useLayoutEffect(() => {
     const el = verseRef.current
     if (!el || !shown) return
-    let size = maxFont
-    el.style.fontSize = `${size}px`
-    while (size > MIN_FONT && el.scrollHeight > el.clientHeight + 1) {
-      size -= 2
+    const fit = () => {
+      let size = maxFont
       el.style.fontSize = `${size}px`
+      while (size > MIN_FONT && el.scrollHeight > el.clientHeight + 1) {
+        size -= 2
+        el.style.fontSize = `${size}px`
+      }
+      setFontSize(size)
     }
-    setFontSize(size)
+    fit()
+    // Measure again once the web font has loaded: the fallback font is narrower, so a
+    // passage that fits before the font arrives can overflow afterwards.
+    let alive = true
+    document.fonts?.ready.then(() => {
+      if (alive) fit()
+    })
+    return () => {
+      alive = false
+    }
   }, [shown, maxFont])
 
   const reference = shown
