@@ -96,12 +96,22 @@ const css = `
   .ss-foot-r { display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 24px; letter-spacing: 4px; color: #fff; }
   .ss-foot-dot { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #d8b45a; display: grid;
     place-items: center; font-size: 13px; color: #f3dc95; }
+  /* /display?layout=full — plain scripture screen, no camera window */
+  .ss-full .ss-bg { clip-path: none; }
+  .ss-full .ss-camborder { display: none; }
+  .ss-full .ss-panel { left: 48px; width: 1824px; }
+  .ss-full .ss-label, .ss-full .ss-rule { left: 96px; }
+  .ss-full .ss-text { left: 96px; right: 96px; top: 160px; bottom: 64px; }
+  .ss-full .ss-verse { line-height: 1.36; }
+  .ss-full .ss-ref { font-size: 40px; }
 `
 
-export default function ScriptureSplit() {
+export default function ScriptureSplit({ full = false }: { full?: boolean }) {
+  // full = no camera window: the scripture panel spans the whole width with larger text.
+  const maxFont = full ? 76 : MAX_FONT
   const [shown, setShown] = useState<LiveVerse | null>(null)
   const [on, setOn] = useState(false)
-  const [fontSize, setFontSize] = useState(MAX_FONT)
+  const [fontSize, setFontSize] = useState(maxFont)
   const [scale, setScale] = useState(1)
 
   const shownRef = useRef<LiveVerse | null>(null)
@@ -176,14 +186,14 @@ export default function ScriptureSplit() {
   useLayoutEffect(() => {
     const el = verseRef.current
     if (!el || !shown) return
-    let size = MAX_FONT
+    let size = maxFont
     el.style.fontSize = `${size}px`
     while (size > MIN_FONT && el.scrollHeight > el.clientHeight + 1) {
       size -= 2
       el.style.fontSize = `${size}px`
     }
     setFontSize(size)
-  }, [shown])
+  }, [shown, maxFont])
 
   const reference = shown
     ? `${shown.reference}${shown.translation ? ` (${shown.translation})` : ''}`
@@ -192,7 +202,7 @@ export default function ScriptureSplit() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
-      <div className={`ss-root ${montserrat.className}`} style={{ transform: `scale(${scale})` }}>
+      <div className={`ss-root${full ? ' ss-full' : ''} ${montserrat.className}`} style={{ transform: `scale(${scale})` }}>
         <div className="ss-bg">
           <div className="ss-rays" />
           {BOKEH.map(([x, y, r, o], i) => (
