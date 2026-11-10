@@ -14,6 +14,7 @@
  *
  * /display?layout=split shows the full scripture-reading layout instead
  * (church banner, camera window, white verse panel) — see ScriptureSplit.
+ * /display?layout=full is a plain white full screen with only the verse and reference.
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -114,7 +115,8 @@ export default function Display() {
     setLayout(new URLSearchParams(window.location.search).get('layout'))
   }, [])
   if (layout === undefined) return null
-  return layout === 'split' ? <ScriptureSplit /> : <LowerThird />
+  if (layout === 'split' || layout === 'full') return <ScriptureSplit full={layout === 'full'} />
+  return <LowerThird />
 }
 
 function LowerThird() {
